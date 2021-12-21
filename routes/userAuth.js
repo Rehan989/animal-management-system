@@ -14,7 +14,7 @@ const JWT_SECRET = `${env.parsed['JWT_SECRET']}`;
 let success = true;
 
 
-// Route 1: creating user using post request on api '/api/auth/signup'
+// Route 1: creating user using post request on api '/api/auth/signup/:userType'
 router.post('/signup/:userType',
     [
         body('username', "Enter a valid username(length should be greater than 6 chars)").isLength({ min: 6 }),
@@ -137,7 +137,7 @@ router.post('/signup/:userType',
     });
 
 
-// Route 2: logging user using post request on api '/api/auth/signup'
+// Route 2: logging user using post request on api '/api/auth/login/:userType'
 router.post('/login/:userType', [
     body('username', "Enter a valid username(length should be greater than 6 chars)").isLength({ min: 6 }),
     body('password', 'Password must be atleast 5 characters').isLength({ min: 5 })
