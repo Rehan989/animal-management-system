@@ -21,7 +21,8 @@ router.get('/technicians/', fetchUser, async (req, res) => {
         doctorId = req.user.id;
         let users = []
         users = await techUser.find({doctor:doctorId});
-        return res.send(JSON.stringify({users}))
+        success = true;
+        return res.send(JSON.stringify({users, success}))
     } catch (error) {
         console.error(error.message);
         success = false
