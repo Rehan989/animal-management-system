@@ -6,6 +6,7 @@ const techUser = require('../models/technicianUser');
 const { body, validationResult } = require('express-validator');
 const dotenv = require('dotenv');
 const animal = require('../models/animal');
+const bullSemenAccount = require('../models/bullSemen');
 const env = dotenv.config()
 
 let success = true;
@@ -99,6 +100,41 @@ fetchUser, async (req, res) => {
         success = false
         return res.status(500).json({ error: "Internal Server Error", success });
     }
-})
+});
+
+
+// Route 3: Creating bull semen accounts '/api/register/bullsemen/'
+router.post('/bullsemen/',
+[
+    body('bullNo', 'Please provide a valid bull no').isNumeric(),
+    body('species', 'Please specify species of the animal').isLength({min:1}),
+    body('breed', 'Please specify a breed').isLength({min:1}),
+    body('doses', 'Enter a valid no. of doses').isNumeric()
+],
+fetchUser, async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            success = false
+            return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
+        }
+
+        let techUserId = req.user.id;
+        let technician = await techUser.findById(techUserId)
+        let { bullNo, species, breed, doses } = req.body;
+        if(!technician){
+            success = false
+            return res.status(401).json({error:"Access Denied", success})
+        }
+        bullSemen = await bullSemenAccount.create({ bullNo:bullNo, species:species, breed:breed, noOfDoses:doses })
+        
+        success = true;
+        return res.status(204).json({ error: "Bull semen Created", success });
+    } catch (error) {
+        console.error(error.message);
+        success = false
+        return res.status(500).json({ error: "Internal Server Error", success });
+    }
+});
 
 module.exports = router;
