@@ -27,6 +27,10 @@ const farmerUserSchema = new Schema({
         type: String,
         required: true,
     },
+    Date: {
+        type: Date,
+        Default: Date.now
+    },
 });
 const farmerUser = mongoose.model('farmerUserSchema', farmerUserSchema)
 farmerUser.createCollection()

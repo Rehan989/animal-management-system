@@ -22,8 +22,7 @@ const animalSchema = new Schema({
         required: true
     },
     aiEntries: {
-        type: Array,
-        required: true
+        type: Array
     },
     date: {
         type: Date,

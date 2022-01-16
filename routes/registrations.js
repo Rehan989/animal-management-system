@@ -7,7 +7,19 @@ const { body, validationResult } = require('express-validator');
 const dotenv = require('dotenv');
 const animal = require('../models/animal');
 const bullSemenAccount = require('../models/bullSemen');
-const env = dotenv.config()
+const ObjectId = require('mongoose').Types.ObjectId;
+  
+// Validator function
+function isValidObjectId(id){
+      
+    if(ObjectId.isValid(id)){
+        if((String)(new ObjectId(id)) === id)
+            return true;        
+        return false;
+    }
+    return false;
+}
+  
 
 let success = true;
 
@@ -31,14 +43,7 @@ fetchUser, async (req, res) => {
             return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
         }
 
-
-        let techUserId = req.user.id;
-        let technician = await techUser.findById(techUserId)
         let { name, village, mobileNo, rationCard, addhar, sex } = req.body;
-        if(!technician){
-            success = false
-            return res.status(401).json({error:"Access Denied!", success})
-        }
         let farmerUser = await farmer.find({'rationCard':rationCard});
         if(farmerUser.length>0){
             success = false;
@@ -79,19 +84,20 @@ fetchUser, async (req, res) => {
             return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
         }
 
-        let techUserId = req.user.id;
-        let technician = await techUser.findById(techUserId)
         let { farmerId, species, breed, age, noOfCalvings } = req.body;
-        if(!technician){
+        if(!isValidObjectId(farmerId)){
             success = false
-            return res.status(401).json({error:"Access Denied", success})
+            return res.status(400).json({error:"Invalid farmer id", success});
         }
+
         let farmerUser = await farmer.findById(farmerId)
         if(!farmerUser){
             success = false
             return res.send(401).json({error:"Farmer Not found", success})
         }
-        farmersAnimals = await animal.create({ farmerId:farmerId, species:species, breed:breed, age:age, noOfCalvings:noOfCalvings })
+
+        
+        let farmersAnimal = await animal.create({ farmerId:farmerId, species:species, breed:breed, age:age, noOfCalvings:noOfCalvings })
         
         success = true;
         return res.status(204).json({ error: "Farmer Created", success });

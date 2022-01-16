@@ -6,7 +6,7 @@ const techUser = require('../models/technicianUser');
 const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
-const dotenv = require('dotenv')
+const dotenv = require('dotenv');
 const env = dotenv.config()
 
 const JWT_SECRET = `${env.parsed['JWT_SECRET']}`;
@@ -86,6 +86,7 @@ router.post('/signup/:userType',
                     return res.status(400).json({ error: "User with the same email already exists!", success });
                 }
 
+                
                 // validating username
                 user = await techUser.findOne({ username: username })
                 // validating if user with te email already exists
@@ -93,6 +94,13 @@ router.post('/signup/:userType',
                     success = false
                     return res.status(400).json({ error: "User with the same username already exists!", success });
                 }
+                
+                let doctorUser = await docUser.findById(doctor);
+                if(!doctorUser){
+                    success = false;
+                    return res.status(400).json({error:"Doctor not found!", success});
+                }
+
 
                 // generating salt for user
                 const salt = await bcrypt.genSalt(12);
@@ -112,6 +120,8 @@ router.post('/signup/:userType',
                     email: email,
                     gender: gender
                 });
+
+                doctorUser = await docUser.findByIdAndUpdate(doctor, {$set:{technicians:doctorUser.technicians.push(user.id)}})
 
                 const data = {
                     user: {
