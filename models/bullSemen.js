@@ -5,6 +5,10 @@ const bullSemenSchema = new Schema({
         type:String,
         required:true
     },
+    bullId:{
+        type:String,
+        required:true
+    },
     species:{
         type:String,
         required:true

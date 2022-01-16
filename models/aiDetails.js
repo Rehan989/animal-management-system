@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose
-const bullSemenSchema = new Schema({
+const aiDetails = new Schema({
     tagNo:{
         type:String,
         required:true
@@ -18,7 +18,7 @@ const bullSemenSchema = new Schema({
         default: Date.now
     },
 });
-const bullSemen = mongoose.model('bullSemenSchema', bullSemenSchema)
-bullSemen.createCollection()
-bullSemen.createIndexes()
-module.exports = bullSemen;
+const aiDetail = mongoose.model('aiDetails', aiDetails)
+aiDetail.createCollection()
+aiDetail.createIndexes()
+module.exports = aiDetail;

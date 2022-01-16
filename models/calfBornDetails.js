@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose
-const bullSemenSchema = new Schema({
+const calfBornSchema = new Schema({
     sex:{
         type:String,
         required:true
@@ -13,7 +13,19 @@ const bullSemenSchema = new Schema({
         type:String,
         required:true
     },
+    tagNo:{
+        type:String,
+        required:true
+    },
+    doses:{
+        type:String,
+        required:true
+    },
     breed:{
+        type:String,
+        required:true
+    },
+    species:{
         type:String,
         required:true
     },
@@ -46,7 +58,7 @@ const bullSemenSchema = new Schema({
         default: Date.now
     },
 });
-const bullSemen = mongoose.model('bullSemenSchema', bullSemenSchema)
-bullSemen.createCollection()
-bullSemen.createIndexes()
-module.exports = bullSemen;
+const calfBorn = mongoose.model('Calf Born details', calfBornSchema)
+calfBorn.createCollection()
+calfBorn.createIndexes()
+module.exports = calfBorn;
