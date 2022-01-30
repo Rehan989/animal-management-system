@@ -6,6 +6,7 @@ const techUser = require('../models/technicianUser');
 const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
+const adminUser = require('../models/adminUser')
 const dotenv = require('dotenv');
 const env = dotenv.config()
 
@@ -203,4 +204,43 @@ router.post('/user/:userType', fetchUser, async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error", success });
     }
 })
+
+// Route 4: authentication admin user '/api/auth/admin/login'
+router.post('/admin/login', [
+    body('email', "Enter a valid email(length should be greater than 6 chars)").isEmail(),
+    body('password', 'Password must be atleast 5 characters').isLength({ min: 5 })
+], async (req, res) => {
+    // If there are any validation errors, return Bad request and the errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        success = false
+        return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
+    }
+
+    try {
+        const { email, password } = req.body;
+        let user = await adminUser.findOne({ email: email })
+        const comparePassword = await bcrypt.compare(password, user.password);
+        if (!comparePassword) {
+            success = false
+            return res.status(400).json({ error: "Invalid credentials!", success });
+        }
+
+        // creating auth-token if all the credentials are good
+        const data = {
+            user: {
+                id: user.id
+            }
+        }
+        const authtoken = jwt.sign(data, JWT_SECRET);
+        success = true
+        return res.send(JSON.stringify({ authtoken: authtoken, success }));
+    }
+    catch (error) {
+        console.error(error.message);
+        success = false
+        return res.status(500).json({ error: "Internal servor error! please try again later!", success })
+    }
+})
+
 module.exports = router;
