@@ -17,7 +17,6 @@ let success = true;
 // Route 1: creating user using post request on api '/api/auth/signup/:userType'
 router.post('/signup/:userType',
     [
-        body('username', "Enter a valid username(length should be greater than 6 chars)").isLength({ min: 6 }),
         body('name', 'Enter a valid name').isLength({ min: 3 }),
         body('email', 'Enter a valid email').isEmail(),
         body('password', 'Password must be atleast 5 characters').isLength({ min: 5 }),
@@ -32,7 +31,7 @@ router.post('/signup/:userType',
         try {
             if (req.params.userType == "doctor") {
                 // extracting required details from the request's body
-                let { name, hostpitalName, username, email, gender, password } = req.body;
+                let { name, hostpitalName, email, gender, password } = req.body;
 
                 // validating if user with this email already exists
                 let user = await docUser.findOne({ email: email })
@@ -40,14 +39,6 @@ router.post('/signup/:userType',
                 if (user) {
                     success = false
                     return res.status(400).json({ error: "User with the same email already exists!", success });
-                }
-
-                // validating username
-                user = await docUser.findOne({ username: username })
-                // validating if user with te email already exists
-                if (user) {
-                    success = false
-                    return res.status(400).json({ error: "User with the same username already exists!", success });
                 }
 
                 // generating salt for user
@@ -58,7 +49,6 @@ router.post('/signup/:userType',
                 user = await docUser.create({
                     hostpitalName: hostpitalName,
                     name: name,
-                    username: username,
                     password: hashedPass,
                     email: email,
                     gender: gender
@@ -76,7 +66,7 @@ router.post('/signup/:userType',
                 return res.send(JSON.stringify({ authtoken: authtoken, success }))
             }
             if (req.params.userType == "technician") {
-                let { name, address, education, villageName, taluka, district, doctor, username, email, gender, password } = req.body;
+                let { name, address, education, villageName, taluka, district, doctor, email, gender, password } = req.body;
 
                 // validating if user with this email already exists
                 let user = await techUser.findOne({ email: email })
@@ -86,19 +76,10 @@ router.post('/signup/:userType',
                     return res.status(400).json({ error: "User with the same email already exists!", success });
                 }
 
-                
-                // validating username
-                user = await techUser.findOne({ username: username })
-                // validating if user with te email already exists
-                if (user) {
-                    success = false
-                    return res.status(400).json({ error: "User with the same username already exists!", success });
-                }
-                
                 let doctorUser = await docUser.findById(doctor);
-                if(!doctorUser){
+                if (!doctorUser) {
                     success = false;
-                    return res.status(400).json({error:"Doctor not found!", success});
+                    return res.status(400).json({ error: "Doctor not found!", success });
                 }
 
 
@@ -115,13 +96,12 @@ router.post('/signup/:userType',
                     district: district,
                     doctor: doctor,
                     name: name,
-                    username: username,
                     password: hashedPass,
                     email: email,
                     gender: gender
                 });
 
-                doctorUser = await docUser.findByIdAndUpdate(doctor, {$set:{technicians:doctorUser.technicians.push(user.id)}})
+                doctorUser = await docUser.findByIdAndUpdate(doctor, { $set: { technicians: doctorUser.technicians.push(user.id) } })
 
                 const data = {
                     user: {
@@ -149,7 +129,7 @@ router.post('/signup/:userType',
 
 // Route 2: logging user using post request on api '/api/auth/login/:userType'
 router.post('/login/:userType', [
-    body('username', "Enter a valid username(length should be greater than 6 chars)").isLength({ min: 6 }),
+    body('email', "Enter a valid email(length should be greater than 6 chars)").isEmail(),
     body('password', 'Password must be atleast 5 characters').isLength({ min: 5 })
 ]
     ,
@@ -162,16 +142,15 @@ router.post('/login/:userType', [
         }
         try {
             // extracting required values from the request's body(req.bdoy)
-            const { username, password } = req.body;
+            const { email, password } = req.body;
             // checking user if it exists or not
             let user = NaN;
             if (req.params.userType === "doctor")
-                user = await docUser.findOne({ username: username });
+                user = await docUser.findOne({ email: email });
             else if (req.params.userType === "technician") {
-                user = await techUser.findOne({ username: username });
+                user = await techUser.findOne({ email: email });
             }
             else {
-                console.log(req.params.userType)
                 return res.status(404).json({ error: "404 not found" });
             }
             if (!user) {
