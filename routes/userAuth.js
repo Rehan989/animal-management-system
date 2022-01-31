@@ -191,13 +191,15 @@ router.post('/user/:userType', fetchUser, async (req, res) => {
             user = await docUser.findById(userId).select("-password")
         else if (req.params.userType === "technician")
             user = await techUser.findById(userId).select("-password")
+        else if (req.params.userType === "admin")
+            user = await adminUser.findById(userId).select("-password")
         else {
             return res.status(404).json({ error: "404 not found" });
         }
         if (!user) {
             return res.status(401).json({ error: 'User not found!' })
         }
-        return res.send(user)
+        return res.status(200).send(user)
     } catch (error) {
         console.error(error.message);
         success = false
