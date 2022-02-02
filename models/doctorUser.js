@@ -5,13 +5,13 @@ const doctorUserSchema = new Schema({
         type: String,
         required: true
     },
-    hostpitalName: {
+    hospitalName: {
         type: String,
         required: true
     },
     technicians: {
         type: Array,
-        unique: true
+        default:[]
     },
     email: {
         type: String,

@@ -21,7 +21,8 @@ router.post('/signup/:userType',
         body('name', 'Enter a valid name').isLength({ min: 3 }),
         body('email', 'Enter a valid email').isEmail(),
         body('password', 'Password must be atleast 5 characters').isLength({ min: 5 }),
-    ]
+    ],
+    fetchUser
     , async (req, res) => {
         // If there are any validation errors, return Bad request and the errors
         const errors = validationResult(req);
@@ -30,9 +31,14 @@ router.post('/signup/:userType',
             return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
         }
         try {
+            let userAdmin = await adminUser.findById(req.user.id);
+            if (!userAdmin) {
+                success = false
+                return res.status(401).json({ error: "Access denied", success })
+            }
             if (req.params.userType == "doctor") {
                 // extracting required details from the request's body
-                let { name, hostpitalName, email, gender, password } = req.body;
+                let { name, hospitalName, email, gender, password } = req.body;
 
                 // validating if user with this email already exists
                 let user = await docUser.findOne({ email: email })
@@ -48,7 +54,7 @@ router.post('/signup/:userType',
 
                 // creating user if all the provided values are correct
                 user = await docUser.create({
-                    hostpitalName: hostpitalName,
+                    hospitalName: hospitalName,
                     name: name,
                     password: hashedPass,
                     email: email,
