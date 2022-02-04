@@ -36,7 +36,7 @@ router.get('/doctor/technicians/', fetchUser, async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error", success });
     }
 })
-// Route 1: Getting all the technicians under doctor '/api/details/farmer/:name'
+// Route 2: Getting all the technicians under doctor '/api/details/farmer/:name'
 router.get('/farmer/:mobileNo', fetchUser, async (req, res) => {
     try {
         technicianUserId = req.user.id;

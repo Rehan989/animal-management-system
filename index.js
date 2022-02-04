@@ -12,6 +12,7 @@ app.use(cors())
 app.use('/api/auth', require('./routes/userAuth'))
 app.use('/api/details', require('./routes/details'))
 app.use('/api/register', require('./routes/registrations'))
+app.use('/api/search', require('./routes/search'))
 
 app.listen(port, () => {
     console.log(`Backend app running at http://localhost:${port}`)

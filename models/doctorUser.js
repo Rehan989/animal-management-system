@@ -3,7 +3,8 @@ const { Schema } = mongoose
 const doctorUserSchema = new Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        text: true
     },
     hospitalName: {
         type: String,
@@ -31,6 +32,7 @@ const doctorUserSchema = new Schema({
         default: Date.now
     },
 });
+doctorUserSchema.index({name:'text'})
 const doctorUser = mongoose.model('doctorUserSchema', doctorUserSchema)
 // doctorUser.createCollection()
 // doctorUser.createIndexes()
