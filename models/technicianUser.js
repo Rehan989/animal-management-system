@@ -47,7 +47,7 @@ const technicianUserSchema = new Schema({
         default: Date.now
     },
 });
-const user = mongoose.model('technicianUserSchema', technicianUserSchema)
+const technicianUser = mongoose.model('technicianUserSchema', technicianUserSchema)
 // user.createCollection()
 // user.createIndexes()
 module.exports = mongoose.model('technicianUserSchema', technicianUserSchema);

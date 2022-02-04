@@ -23,7 +23,7 @@ router.get('/doctor/:doctorName/', fetchUser, async (req, res) => {
             {
                 _id: 0
             }
-        ).limit(5)
+        ).limit(5).select('-password')
         // let doctors = await doctorUser.find({
         //     $text: {
         //         $search: doctorName

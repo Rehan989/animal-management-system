@@ -83,7 +83,7 @@ router.post('/signup/:userType',
                     return res.status(400).json({ error: "User with the same email already exists!", success });
                 }
 
-                let doctorUser = await docUser.findById(doctor);
+                let doctorUser = await docUser.findOne({email:doctor});
                 if (!doctorUser) {
                     success = false;
                     return res.status(400).json({ error: "Doctor not found!", success });
@@ -108,7 +108,7 @@ router.post('/signup/:userType',
                     gender: gender
                 });
 
-                doctorUser = await docUser.findByIdAndUpdate(doctor, { $set: { technicians: doctorUser.technicians.push(user.id) } })
+                doctorUser = await docUser.findByIdAndUpdate(doctorUser._id, { $set: { technicians: doctorUser.technicians.push(user._id) } })
 
                 const data = {
                     user: {
