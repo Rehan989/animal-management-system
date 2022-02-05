@@ -108,7 +108,7 @@ router.post('/signup/:userType',
                     gender: gender
                 });
 
-                doctorUser = await docUser.findByIdAndUpdate(doctorUser._id, { $set: { technicians: doctorUser.technicians.push(user._id) } })
+                doctorUser = await docUser.findByIdAndUpdate(doctorUser._id, { $set: { technicians: doctorUser.technicians.push(user.id) } })
 
                 const data = {
                     user: {
@@ -228,6 +228,10 @@ router.post('/admin/login', [
     try {
         const { email, password } = req.body;
         let user = await adminUser.findOne({ email: email })
+        if(!user){
+            success = false
+            return res.status(400).json({ error: "Invalid credentials!", success });
+        }
         const comparePassword = await bcrypt.compare(password, user.password);
         if (!comparePassword) {
             success = false
