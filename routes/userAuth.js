@@ -107,8 +107,7 @@ router.post('/signup/:userType',
                     email: email,
                     gender: gender
                 });
-
-                doctorUser = await docUser.findByIdAndUpdate(doctorUser._id, { $set: { technicians: doctorUser.technicians.push(user.id) } })
+                doctorUser = await docUser.findByIdAndUpdate(doctorUser._id, { $set: { technicians: [...doctorUser.technicians, user.id] } })
 
                 const data = {
                     user: {

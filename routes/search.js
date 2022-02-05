@@ -24,16 +24,6 @@ router.get('/doctor/:doctorName/', fetchUser, async (req, res) => {
                 _id: 0
             }
         ).limit(5).select('-password')
-        // let doctors = await doctorUser.find({
-        //     $text: {
-        //         $search: doctorName
-        //     }
-        // },
-        //     {
-        //         _id: 0
-        //     }
-        // )
-        console.log(doctors);
         success = true;
         return res.send(JSON.stringify({ doctors, success }))
     } catch (error) {
