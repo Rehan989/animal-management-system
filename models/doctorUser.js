@@ -27,6 +27,10 @@ const doctorUserSchema = new Schema({
         type: String,
         required: true
     },
+    user_type: {
+        type: String,
+        default:'doctor'
+    },
     date: {
         type: Date,
         default: Date.now

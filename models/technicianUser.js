@@ -42,6 +42,10 @@ const technicianUserSchema = new Schema({
         type: String,
         required: true
     },
+    user_type: {
+        type: String,
+        default:'technician'
+    },
     date: {
         type: Date,
         default: Date.now

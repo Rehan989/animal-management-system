@@ -70,7 +70,7 @@ router.post('/signup/:userType',
 
                 // sending jwt token as the response
                 success = true
-                return res.send(JSON.stringify({ authtoken: authtoken, success }))
+                return res.send(JSON.stringify({ authtoken: authtoken, success, user_type:user.user_type }))
             }
             if (req.params.userType == "technician") {
                 let { name, address, education, villageName, taluka, district, doctor, email, gender, password } = req.body;
@@ -118,7 +118,7 @@ router.post('/signup/:userType',
 
                 // sending jwt token as the response
                 success = true
-                return res.send(JSON.stringify({ authtoken: authtoken, success }))
+                return res.send(JSON.stringify({ authtoken: authtoken, success, user_type:user.user_type }))
             }
             if (req.params.userType !== "doctor" || req.params.userType !== "technician") {
                 success = false
@@ -177,7 +177,7 @@ router.post('/login/:userType', [
             }
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true
-            return res.send(JSON.stringify({ authtoken: authtoken, success }));
+            return res.send(JSON.stringify({ authtoken: authtoken, success, user_type:user.user_type }));
         }
         catch (error) {
             console.error(error.message);
@@ -245,7 +245,7 @@ router.post('/admin/login', [
         }
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true
-        return res.send(JSON.stringify({ authtoken: authtoken, success }));
+        return res.send(JSON.stringify({ authtoken: authtoken, success, user_type:user.user_type }));
     }
     catch (error) {
         console.error(error.message);
