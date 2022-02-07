@@ -1,0 +1,27 @@
+{
+  "Cattle": [
+    "HF x ND",
+    "HF x GIR",
+    "HF x KHILLARI",
+    "HF x SAHIWAL",
+    "HF x DANGI",
+    "JY x GIR",
+    "JY x SAHIWAL",
+    "JY x DANGI",
+    "JY x ND",
+    "GIR",
+    "KHILLARI",
+    "SAHIWAL",
+    "DANGI",
+    "ND"
+  ],
+  "Buffalo": [
+    "Jafarabadi",
+    "Mehsana",
+    "Murrah",
+    "Nagpuri",
+    "Pandharpuri",
+    "Surti",
+    "ND"
+  ]
+}
