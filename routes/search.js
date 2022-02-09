@@ -3,6 +3,7 @@ var router = express.Router();
 const fetchUser = require('../middleware/fetchUser')
 const doctorUser = require('../models/doctorUser');
 const farmer = require('../models/farmer');
+const animal = require('../models/animal');
 let success = false;
 
 // Route 1: Getting doctor with his name '/api/search/doctor/:doctorName/'
@@ -37,13 +38,13 @@ router.get('/doctor/:doctorName/', fetchUser, async (req, res) => {
 
 // Route 2: Getting Farmer with his name '/api/search/farmer/:farmerName/'
 router.get('/farmer/:farmerName/', fetchUser, async (req, res) => {
-    let doctorName = "";
+    let farmerName = "";
     try {
         farmerName = req.params.farmerName;
         // If there are any validation errors, return Bad request and the errors
         if (farmerName.length <= 3) {
             success = false
-            return res.status(422).json({ error: "Doctor name should be of 3 or more characters!", success })
+            return res.status(422).json({ error: "Farmer name should be of 3 or more characters!", success })
         }
 
         let farmers = await farmer.find({
@@ -57,6 +58,33 @@ router.get('/farmer/:farmerName/', fetchUser, async (req, res) => {
         ).limit(5).select('-password')
         success = true;
         return res.send(JSON.stringify({ farmers, success }))
+    } catch (error) {
+        console.error(error.message);
+        success = false
+        return res.status(500).json({ error: "Internal Server Error", success });
+    }
+})
+
+// Route 3: Getting Animals with their id '/api/search/animals/:farmerPhone/'
+router.get('/animals/:farmerPhone/', fetchUser, async (req, res) => {
+    let farmerPhone = "";
+    try {
+        farmerPhone = req.params.farmerPhone;
+
+        let farmerUser = await farmer.findOne({
+            mobileNo: farmerPhone
+        })
+        if (!farmerUser) {
+            success = false
+            return res.status(422).json({ error: "Farmer not found!", success })
+        }
+
+        let animals = await animal.find({
+            farmerId: farmerPhone
+        })
+
+        success = true;
+        return res.send(JSON.stringify({ animals, success }))
     } catch (error) {
         console.error(error.message);
         success = false
