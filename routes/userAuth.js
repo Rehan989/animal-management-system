@@ -70,7 +70,7 @@ router.post('/signup/:userType',
 
                 // sending jwt token as the response
                 success = true
-                return res.send(JSON.stringify({ authtoken: authtoken, success, user_type:user.user_type }))
+                return res.send(JSON.stringify({ authtoken: authtoken, success, user_type: user.user_type }))
             }
             if (req.params.userType == "technician") {
                 let { name, address, education, villageName, taluka, district, doctor, email, gender, password } = req.body;
@@ -83,7 +83,7 @@ router.post('/signup/:userType',
                     return res.status(400).json({ error: "User with the same email already exists!", success });
                 }
 
-                let doctorUser = await docUser.findOne({email:doctor});
+                let doctorUser = await docUser.findOne({ email: doctor });
                 if (!doctorUser) {
                     success = false;
                     return res.status(400).json({ error: "Doctor not found!", success });
@@ -118,7 +118,7 @@ router.post('/signup/:userType',
 
                 // sending jwt token as the response
                 success = true
-                return res.send(JSON.stringify({ authtoken: authtoken, success, user_type:user.user_type }))
+                return res.send(JSON.stringify({ authtoken: authtoken, success, user_type: user.user_type }))
             }
             if (req.params.userType !== "doctor" || req.params.userType !== "technician") {
                 success = false
@@ -177,7 +177,7 @@ router.post('/login/:userType', [
             }
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true
-            return res.send(JSON.stringify({ authtoken: authtoken, success, user_type:user.user_type }));
+            return res.send(JSON.stringify({ authtoken: authtoken, success, user_type: user.user_type }));
         }
         catch (error) {
             console.error(error.message);
@@ -227,7 +227,7 @@ router.post('/admin/login', [
     try {
         const { email, password } = req.body;
         let user = await adminUser.findOne({ email: email })
-        if(!user){
+        if (!user) {
             success = false
             return res.status(400).json({ error: "Invalid credentials!", success });
         }
@@ -245,7 +245,7 @@ router.post('/admin/login', [
         }
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true
-        return res.send(JSON.stringify({ authtoken: authtoken, success, user_type:user.user_type }));
+        return res.send(JSON.stringify({ authtoken: authtoken, success, user_type: user.user_type }));
     }
     catch (error) {
         console.error(error.message);

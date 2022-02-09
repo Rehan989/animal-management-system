@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose
 const animalSchema = new Schema({
-    farmerId:{
-        type:String,
-        required:true
+    farmerId: {
+        type: String,
+        required: true
+    },
+    tagNo: {
+        type: String,
+        required: true,
+        unique: true
     },
     species: {
         type: String,

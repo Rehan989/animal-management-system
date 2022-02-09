@@ -22,14 +22,14 @@ router.get('/doctor/technicians/', fetchUser, async (req, res) => {
     try {
         doctorId = req.user.id;
         doctor = docUser.findById(doctorId)
-        if(!doctor){
+        if (!doctor) {
             success = false
-            return res.status(401).json({error:"Access Denied", success})
+            return res.status(401).json({ error: "Access Denied", success })
         }
         let users = []
-        users = await techUser.find({doctor:doctorId});
+        users = await techUser.find({ doctor: doctorId });
         success = true;
-        return res.send(JSON.stringify({users, success}))
+        return res.send(JSON.stringify({ users, success }))
     } catch (error) {
         console.error(error.message);
         success = false
@@ -41,14 +41,14 @@ router.get('/farmer/:mobileNo', fetchUser, async (req, res) => {
     try {
         technicianUserId = req.user.id;
         technician = await techUser.findById(technicianUserId);
-        if(!technician){
+        if (!technician) {
             success = false
-            return res.status(401).json({error:"Access Denied", success})
+            return res.status(401).json({ error: "Access Denied", success })
         }
         let farmerMobileNo = req.params.mobileNo;
-        let farmer = await farmers.findOne({mobileNo:farmerMobileNo})
+        let farmer = await farmers.findOne({ mobileNo: farmerMobileNo })
         success = true
-        return res.send(JSON.stringify({farmer:farmer.id, success}))
+        return res.send(JSON.stringify({ farmer: farmer.id, success }))
     } catch (error) {
         console.error(error.message);
         success = false

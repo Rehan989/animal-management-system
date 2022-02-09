@@ -9,6 +9,10 @@ const farmerUserSchema = new Schema({
         type: String,
         required: true
     },
+    animals: {
+        type: Array,
+        default: []
+    },
     mobileNo: {
         type: String,
         unique: true

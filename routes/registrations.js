@@ -75,6 +75,7 @@ router.post('/farmer/',
 router.post('/animal/',
     [
         body('farmerId', 'Please provide a valid farmer id').isLength({ min: 1 }),
+        body('tagNo', 'Please provide a valid farmer id').isLength({ min: 1 }),
         body('species', 'Please specify species of the animal').isLength({ min: 1 }),
         body('breed', 'Please specify a breed').isLength({ min: 1 }),
         body('age', 'Enter a valid age').isNumeric(),
@@ -88,21 +89,24 @@ router.post('/animal/',
                 return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
             }
 
-            let { farmerId, species, breed, age, noOfCalvings } = req.body;
-            if (!isValidObjectId(farmerId)) {
+            let { farmerId, tagNo, species, breed, age, noOfCalvings } = req.body;
+
+            let farmerAnimal = await animal.findOne({ tagNo: tagNo });
+            if (farmerAnimal) {
                 success = false
-                return res.status(400).json({ error: "Invalid farmer id", success });
+                return res.status(401).json({ error: "Animal with the same tag number already exists", success })
             }
 
-            let farmerUser = await farmer.findById(farmerId)
+            let farmerUser = await farmer.findOne({ mobileNo: farmerId })
             if (!farmerUser) {
                 success = false
-                return res.send(401).json({ error: "Farmer Not found", success })
+                return res.status(401).json({ error: "Farmer Not found", success })
             }
 
 
-            let farmersAnimal = await animal.create({ farmerId: farmerId, species: species, breed: breed, age: age, noOfCalvings: noOfCalvings })
+            let farmersAnimal = await animal.create({ tagNo: tagNo, farmerId: farmerId, species: species, breed: breed, age: age, noOfCalvings: noOfCalvings })
 
+            farmerUser = await farmer.findByIdAndUpdate(farmerUser._id, { $set: { animals: [...farmerUser.animals, farmersAnimal._id] } })
             success = true;
             return res.status(204).json({ error: "Farmer Created", success });
         } catch (error) {
