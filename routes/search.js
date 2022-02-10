@@ -66,25 +66,37 @@ router.get('/farmer/:farmerName/', fetchUser, async (req, res) => {
 })
 
 // Route 3: Getting Animals with their id '/api/search/animals/:farmerPhone/'
-router.get('/animals/:farmerPhone/', fetchUser, async (req, res) => {
-    let farmerPhone = "";
+router.get('/animals', fetchUser, async (req, res) => {
+    let mobileNo = "", tagNo = "";
     try {
-        farmerPhone = req.params.farmerPhone;
-
-        let farmerUser = await farmer.findOne({
-            mobileNo: farmerPhone
-        })
-        if (!farmerUser) {
-            success = false
-            return res.status(422).json({ error: "Farmer not found!", success })
+        mobileNo = req.query['farmerid'];
+        tagNo = req.query['tagno'];
+        if (mobileNo) {
+            let farmerUser = await farmer.findOne({
+                mobileNo
+            })
+            if (!farmerUser) {
+                success = false
+                return res.status(422).json({ error: "Farmer not found!", success })
+            }
+            let animals = await animal.find({
+                farmerId: mobileNo
+            })
+            success = true;
+            return res.send(JSON.stringify({ animals, success }))
         }
+        else if (tagNo) {
 
-        let animals = await animal.find({
-            farmerId: farmerPhone
-        })
-
-        success = true;
-        return res.send(JSON.stringify({ animals, success }))
+            let animals = await animal.findOne({
+                tagNo: tagNo
+            })
+            success = true;
+            return res.send(JSON.stringify({ animals, success }))
+        }
+        else {
+            success = false
+            return res.status(422).json({ error: "Invalid search query!", success })
+        }
     } catch (error) {
         console.error(error.message);
         success = false
