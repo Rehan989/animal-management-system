@@ -1,12 +1,13 @@
 var express = require('express')
 var router = express.Router();
 const fetchUser = require('../middleware/fetchUser')
-const farmer = require('../models/farmer')
-const techUser = require('../models/technicianUser');
 const { body, validationResult } = require('express-validator');
 const dotenv = require('dotenv');
+const farmer = require('../models/farmer')
+const techUser = require('../models/technicianUser');
 const animal = require('../models/animal');
 const bullSemenAccount = require('../models/bullSemen');
+const aiDetails = require('../models/aiDetails');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 // Validator function
@@ -108,7 +109,7 @@ router.post('/animal/',
 
             farmerUser = await farmer.findByIdAndUpdate(farmerUser._id, { $set: { animals: [...farmerUser.animals, farmersAnimal._id] } })
             success = true;
-            return res.status(204).json({ error: "Farmer Created", success });
+            return res.status(204).json({ error: "Animal created!", success });
         } catch (error) {
             console.error(error.message);
             success = false
@@ -121,9 +122,10 @@ router.post('/animal/',
 router.post('/bullsemen/',
     [
         body('bullNo', 'Please provide a valid bull no').isNumeric(),
+        body('bullId', 'Please provide a valid bull id').isNumeric(),
         body('species', 'Please specify species of the animal').isLength({ min: 1 }),
         body('breed', 'Please specify a breed').isLength({ min: 1 }),
-        body('doses', 'Enter a valid no. of doses').isNumeric()
+        body('noOfDoses', 'Enter a valid no. of doses').isNumeric()
     ],
     fetchUser, async (req, res) => {
         try {
@@ -135,12 +137,31 @@ router.post('/bullsemen/',
 
             let techUserId = req.user.id;
             let technician = await techUser.findById(techUserId)
-            let { bullNo, species, breed, doses } = req.body;
             if (!technician) {
                 success = false
                 return res.status(401).json({ error: "Access Denied", success })
             }
-            bullSemen = await bullSemenAccount.create({ bullNo: bullNo, species: species, breed: breed, noOfDoses: doses })
+
+            let { bullNo, bullId, date, species, breed, noOfDoses } = req.body;
+
+            let bullSemen = await bullSemenAccount.findOne({
+                bullNo: bullNo
+            })
+            if (bullSemen) {
+                success = false
+                return res.status(422).json({ error: "User with the same bull number already exists!", success })
+            }
+
+            bullSemen = await bullSemenAccount.findOne({
+                bullId: bullId
+            })
+
+            if (bullSemen) {
+                success = false
+                return res.status(422).json({ error: "User with the same bull id already exists!", success })
+            }
+
+            bullSemen = await bullSemenAccount.create({ bullNo: bullNo, species: species, breed: breed, noOfDoses: noOfDoses, date: date, bullId: bullId })
 
             success = true;
             return res.status(204).json({ error: "Bull semen Created", success });
@@ -150,5 +171,42 @@ router.post('/bullsemen/',
             return res.status(500).json({ error: "Internal Server Error", success });
         }
     });
+
+// Route 4: Creating farmer '/api/register/aidetails'
+router.post('/aidetails/',
+    [
+        body('bullId', 'Enter a bull id').isNumeric(),
+    ],
+    fetchUser, async (req, res) => {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                success = false
+                return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
+            }
+
+            let { bullId, date, freshReports } = req.body;
+
+            let bullSemen = await bullSemenAccount.findOne({ bullId: bullId })
+            if (!bullSemen) {
+                success = false;
+                return res.status(422).json({ error: "Bull semen account with the specific id not found!", success });
+            }
+
+            let aidetails = await aiDetails.create({
+                bullId: bullId,
+                date: date,
+                freshReports: freshReports
+            });
+
+            success = true;
+            return res.status(204).json({ error: "Ai details Created", success });
+        } catch (error) {
+            console.error(error.message);
+            success = false
+            return res.status(500).json({ error: "Internal Server Error", success });
+        }
+    })
+
 
 module.exports = router;
