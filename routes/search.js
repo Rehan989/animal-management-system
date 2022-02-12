@@ -4,30 +4,44 @@ const fetchUser = require('../middleware/fetchUser')
 const doctorUser = require('../models/doctorUser');
 const farmer = require('../models/farmer');
 const animal = require('../models/animal');
+const aiDetails = require('../models/aiDetails');
 let success = false;
 
-// Route 1: Getting doctor with his name '/api/search/doctor/:doctorName/'
-router.get('/doctor/:doctorName/', fetchUser, async (req, res) => {
-    let doctorName = "";
-    try {
-        doctorName = req.params.doctorName;
-        // If there are any validation errors, return Bad request and the errors
-        if (doctorName.length <= 3) {
-            success = false
-            return res.status(422).json({ error: "Doctor name should be of 3 or more characters!", success })
-        }
 
-        let doctors = await doctorUser.find({
-            name: {
-                $regex: new RegExp(doctorName)
+// Route 1: Getting doctor with his name '/api/search/doctor'
+router.get('/doctor', fetchUser, async (req, res) => {
+    let doctorName = "", doctorEmail = "";
+    try {
+        doctorName = req.query.name;
+        doctorEmail = req.query.email;
+        // If there are any validation errors, return Bad request and the errors
+        if (doctorName) {
+            if (doctorName.length <= 3) {
+                success = false
+                return res.status(422).json({ error: "Doctor name should be of 3 or more characters!", success })
             }
-        },
-            {
-                _id: 0
-            }
-        ).limit(5).select('-password')
-        success = true;
-        return res.send(JSON.stringify({ doctors, success }))
+
+            let doctors = await doctorUser.find({
+                name: {
+                    $regex: new RegExp(doctorName)
+                }
+            },
+                {
+                    _id: 0
+                }
+            ).limit(5).select('-password')
+            success = true;
+            return res.send(JSON.stringify({ doctors, success }))
+        }
+        else if (doctorEmail) {
+            let doctor = await doctorUser.findOne({ email: doctorEmail }).select('-password');
+            success = true
+            return res.send(JSON.stringify({ doctor, success }))
+        }
+        else {
+            success = false
+            return res.status(422).json({ error: "Invalid search query!", success })
+        }
     } catch (error) {
         console.error(error.message);
         success = false
@@ -37,27 +51,45 @@ router.get('/doctor/:doctorName/', fetchUser, async (req, res) => {
 
 
 // Route 2: Getting Farmer with his name '/api/search/farmer/:farmerName/'
-router.get('/farmer/:farmerName/', fetchUser, async (req, res) => {
+router.get('/farmer', fetchUser, async (req, res) => {
     let farmerName = "";
     try {
-        farmerName = req.params.farmerName;
-        // If there are any validation errors, return Bad request and the errors
-        if (farmerName.length <= 3) {
-            success = false
-            return res.status(422).json({ error: "Farmer name should be of 3 or more characters!", success })
-        }
+        farmerName = req.query.name;
+        farmerPhone = req.query.phone;
+        if (farmerName) {
+            // If there are any validation errors, return Bad request and the errors
+            if (farmerName.length <= 3) {
+                success = false
+                return res.status(422).json({ error: "Farmer name should be of 3 or more characters!", success })
+            }
 
-        let farmers = await farmer.find({
-            name: {
-                $regex: new RegExp(farmerName)
+            let farmers = await farmer.find({
+                name: {
+                    $regex: new RegExp(farmerName)
+                }
+            },
+                {
+                    _id: 0
+                }
+            ).limit(5).select('-password')
+            success = true;
+            return res.send(JSON.stringify({ farmers, success }))
+        }
+        else if (farmerPhone) {
+            // If there are any validation errors, return Bad request and the errors
+            if (farmerPhone.length < 10) {
+                success = false
+                return res.status(422).json({ error: "Phone number should be of 10 numbers!", success })
             }
-        },
-            {
-                _id: 0
-            }
-        ).limit(5).select('-password')
-        success = true;
-        return res.send(JSON.stringify({ farmers, success }))
+
+            let farmerUser = await farmer.findOne({ mobileNo: farmerPhone }).select('-password')
+            success = true;
+            return res.send(JSON.stringify({ farmerUser, success }))
+        }
+        else {
+            success = false
+            return res.status(422).json({ error: "Invalid search query!", success })
+        }
     } catch (error) {
         console.error(error.message);
         success = false
@@ -97,6 +129,22 @@ router.get('/animals', fetchUser, async (req, res) => {
             success = false
             return res.status(422).json({ error: "Invalid search query!", success })
         }
+    } catch (error) {
+        console.error(error.message);
+        success = false
+        return res.status(500).json({ error: "Internal Server Error", success });
+    }
+})
+
+// Route 4: Getting ai details with the tag number field '/api/search/aidetails/:/'
+router.get('/aidetails/:tagno', fetchUser, async (req, res) => {
+    try {
+        let tagNo = req.params.tagno;
+        let aidetails = await aiDetails.findOne({ tagNo: tagNo })
+
+        success = true;
+        return res.send(JSON.stringify({ aidetails, success }))
+
     } catch (error) {
         console.error(error.message);
         success = false

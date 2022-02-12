@@ -172,7 +172,7 @@ router.post('/bullsemen/',
         }
     });
 
-// Route 4: Creating farmer '/api/register/aidetails'
+// Route 4: Creating ai details at '/api/register/aidetails'
 router.post('/aidetails/',
     [
         body('bullId', 'Enter a bull id').isNumeric(),
