@@ -8,6 +8,7 @@ const techUser = require('../models/technicianUser');
 const animal = require('../models/animal');
 const bullSemenAccount = require('../models/bullSemen');
 const aiDetails = require('../models/aiDetails');
+const pregnancyDetail = require('../models/pregnancyDetails')
 const ObjectId = require('mongoose').Types.ObjectId;
 
 // Validator function
@@ -201,6 +202,57 @@ router.post('/aidetails/',
 
             success = true;
             return res.status(204).json({ error: "Ai details Created", success });
+        } catch (error) {
+            console.error(error.message);
+            success = false
+            return res.status(500).json({ error: "Internal Server Error", success });
+        }
+    })
+
+// Route 4: Creating ai details at '/api/register/aidetails'
+router.post('/pd/',
+    [
+        body('animalTagNo', 'Tag number should be a integer field!').isNumeric(),
+        body('bullId', 'Bull id should be a integer field!').isNumeric()
+    ],
+    fetchUser, async (req, res) => {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                success = false
+                return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
+            }
+
+            let { animalTagNo,
+                bullId,
+                villageName,
+                ownerName,
+                aiDate,
+                breed,
+                species,
+                freshReports,
+                pdDate,
+                pdResult,
+                pregnancyDays,
+                doctorName } = req.body;
+
+            let pdDetails = await pregnancyDetail.create({
+                animalTagNo,
+                bullId,
+                villageName,
+                ownerName,
+                aiDate,
+                breed,
+                species,
+                freshReports,
+                pdDate,
+                pdResult,
+                pregnancyDays,
+                vdUserId: doctorName
+            });
+
+            success = true;
+            return res.status(204).json({ error: "PD details Created", success });
         } catch (error) {
             console.error(error.message);
             success = false
