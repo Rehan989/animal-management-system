@@ -5,6 +5,7 @@ const doctorUser = require('../models/doctorUser');
 const farmer = require('../models/farmer');
 const animal = require('../models/animal');
 const aiDetails = require('../models/aiDetails');
+const pdDetails = require('../models/pregnancyDetails')
 let success = false;
 
 
@@ -144,6 +145,22 @@ router.get('/aidetails/:tagno', fetchUser, async (req, res) => {
 
         success = true;
         return res.send(JSON.stringify({ aidetails, success }))
+
+    } catch (error) {
+        console.error(error.message);
+        success = false
+        return res.status(500).json({ error: "Internal Server Error", success });
+    }
+})
+
+// Route 4: Getting ai details with the tag number field '/api/search/aidetails/:/'
+router.get('/pdDetails/:tagno', fetchUser, async (req, res) => {
+    try {
+        let tagNo = req.params.tagno;
+        let pregnancyDetails = await pdDetails.findOne({ tagNo: tagNo })
+
+        success = true;
+        return res.send(JSON.stringify({ pregnancyDetails, success }))
 
     } catch (error) {
         console.error(error.message);

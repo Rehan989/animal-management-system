@@ -234,7 +234,8 @@ router.post('/pd/',
                 pdDate,
                 pdResult,
                 pregnancyDays,
-                doctorName } = req.body;
+                doctorName,
+                tagNo } = req.body;
 
             let pdDetails = await pregnancyDetail.create({
                 animalTagNo,
@@ -248,6 +249,7 @@ router.post('/pd/',
                 pdDate,
                 pdResult,
                 pregnancyDays,
+                tagNo,
                 vdUserId: doctorName
             });
 
