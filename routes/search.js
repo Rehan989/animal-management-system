@@ -153,7 +153,7 @@ router.get('/aidetails/:tagno', fetchUser, async (req, res) => {
     }
 })
 
-// Route 4: Getting ai details with the tag number field '/api/search/aidetails/:/'
+// Route 5: Getting pd details with the tag number field '/api/search/pdDetails/:/'
 router.get('/pdDetails/:tagno', fetchUser, async (req, res) => {
     try {
         let tagNo = req.params.tagno;
@@ -168,5 +168,4 @@ router.get('/pdDetails/:tagno', fetchUser, async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error", success });
     }
 })
-
 module.exports = router;
