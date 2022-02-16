@@ -9,6 +9,7 @@ const animal = require('../models/animal');
 const bullSemenAccount = require('../models/bullSemen');
 const aiDetails = require('../models/aiDetails');
 const pregnancyDetail = require('../models/pregnancyDetails')
+const calfBornDetails = require('../models/calfBornDetails')
 const ObjectId = require('mongoose').Types.ObjectId;
 
 // Validator function
@@ -287,26 +288,28 @@ router.post('/calf-details/',
                 breed,
                 species,
                 freshReports,
-                pdDate } = req.body;
+                pdDate,
+                aiDate } = req.body;
 
-            let pdDetails = await pregnancyDetail.create({
+            let calfBornDetail = await calfBornDetails.create({
                 animalTagNo,
                 calfBornDate,
-                gender,
+                sex: gender,
                 easeOfCalvings,
                 tagNo,
                 gestationDays,
                 bullId,
-                villageName,
-                ownerName,
+                village: villageName,
+                owner: ownerName,
                 breed,
                 species,
-                freshReports,
-                pdDate
+                fresh: freshReports,
+                pdDate,
+                aiDate
             });
 
             success = true;
-            return res.status(204).json({ error: "PD details Created", success });
+            return res.status(204).json({ error: "Calf born details Created", success });
         } catch (error) {
             console.error(error.message);
             success = false

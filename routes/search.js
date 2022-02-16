@@ -102,9 +102,10 @@ router.get('/farmer', fetchUser, async (req, res) => {
 router.get('/animals', fetchUser, async (req, res) => {
     let mobileNo = "", tagNo = "";
     try {
-        mobileNo = req.query['farmerid'];
-        tagNo = req.query['tagno'];
+        mobileNo = req.query.farmerid;
+        tagNo = req.query.tagno;
         if (mobileNo) {
+            console.log(mobileNo)
             let farmerUser = await farmer.findOne({
                 mobileNo
             })
@@ -115,7 +116,7 @@ router.get('/animals', fetchUser, async (req, res) => {
             let animals = await animal.find({
                 farmerId: mobileNo
             })
-            success = true;
+            success = true
             return res.send(JSON.stringify({ animals, success }))
         }
         else if (tagNo) {
@@ -138,10 +139,10 @@ router.get('/animals', fetchUser, async (req, res) => {
 })
 
 // Route 4: Getting ai details with the tag number field '/api/search/aidetails/:/'
-router.get('/aidetails/:tagno', fetchUser, async (req, res) => {
+router.get('/aidetails', fetchUser, async (req, res) => {
     try {
-        let tagNo = req.params.tagno;
-        let aidetails = await aiDetails.findOne({ tagNo: tagNo })
+        let bullid = req.query.bullid;
+        let aidetails = await aiDetails.findOne({ bullId: bullid })
 
         success = true;
         return res.send(JSON.stringify({ aidetails, success }))
