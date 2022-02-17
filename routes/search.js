@@ -5,7 +5,7 @@ const doctorUser = require('../models/doctorUser');
 const farmer = require('../models/farmer');
 const animal = require('../models/animal');
 const aiDetails = require('../models/aiDetails');
-const pdDetails = require('../models/pregnancyDetails')
+const pdDetails = require('../models/pregnancyDetails');
 let success = false;
 
 
@@ -73,6 +73,10 @@ router.get('/farmer', fetchUser, async (req, res) => {
                     _id: 0
                 }
             ).limit(5).select('-password')
+            for (let i = 0; i < farmers.length; i++) {
+                let anml = await animal.find({ farmerId: farmers[i].mobileNo });
+                farmers[i].animals = anml;
+            }
             success = true;
             return res.send(JSON.stringify({ farmers, success }))
         }
@@ -105,7 +109,6 @@ router.get('/animals', fetchUser, async (req, res) => {
         mobileNo = req.query.farmerid;
         tagNo = req.query.tagno;
         if (mobileNo) {
-            console.log(mobileNo)
             let farmerUser = await farmer.findOne({
                 mobileNo
             })
