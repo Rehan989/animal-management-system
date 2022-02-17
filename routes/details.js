@@ -36,24 +36,5 @@ router.get('/doctor/technicians/', fetchUser, async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error", success });
     }
 })
-// Route 2: Getting all the technicians under doctor '/api/details/farmer/:name'
-router.get('/farmer/:mobileNo', fetchUser, async (req, res) => {
-    try {
-        technicianUserId = req.user.id;
-        technician = await techUser.findById(technicianUserId);
-        if (!technician) {
-            success = false
-            return res.status(401).json({ error: "Access Denied", success })
-        }
-        let farmerMobileNo = req.params.mobileNo;
-        let farmer = await farmers.findOne({ mobileNo: farmerMobileNo })
-        success = true
-        return res.send(JSON.stringify({ farmer: farmer.id, success }))
-    } catch (error) {
-        console.error(error.message);
-        success = false
-        return res.status(500).json({ error: "Internal Server Error", success });
-    }
-})
 
 module.exports = router;

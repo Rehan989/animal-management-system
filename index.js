@@ -14,6 +14,7 @@ app.use('/api/get/', require('./routes/data'))
 app.use('/api/details', require('./routes/details'))
 app.use('/api/register', require('./routes/registrations'))
 app.use('/api/search', require('./routes/search'))
+app.use('/api/report', require('./routes/reports'))
 
 app.listen(port, () => {
     console.log(`Backend app running at http://localhost:${port}`)

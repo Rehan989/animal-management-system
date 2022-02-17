@@ -6,6 +6,10 @@ const bullSemenSchema = new Schema({
         required: true,
         unique: true
     },
+    animalTagNo: {
+        type: String,
+        required: true
+    },
     bullId: {
         type: String,
         required: true,
@@ -25,6 +29,10 @@ const bullSemenSchema = new Schema({
     },
     date: {
         type: Date,
+        required: true
+    },
+    technicianId: {
+        type: String,
         required: true
     },
 });

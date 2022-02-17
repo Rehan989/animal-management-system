@@ -144,8 +144,8 @@ router.get('/animals', fetchUser, async (req, res) => {
 // Route 4: Getting ai details with the tag number field '/api/search/aidetails/:/'
 router.get('/aidetails', fetchUser, async (req, res) => {
     try {
-        let bullid = req.query.bullid;
-        let aidetails = await aiDetails.findOne({ bullId: bullid })
+        let animalTagNo = req.query.tagno;
+        let aidetails = await aiDetails.findOne({ animalTagNo: animalTagNo })
 
         success = true;
         return res.send(JSON.stringify({ aidetails, success }))

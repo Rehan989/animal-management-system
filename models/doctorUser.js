@@ -12,7 +12,7 @@ const doctorUserSchema = new Schema({
     },
     technicians: {
         type: Array,
-        default:[]
+        default: []
     },
     email: {
         type: String,
@@ -29,14 +29,14 @@ const doctorUserSchema = new Schema({
     },
     user_type: {
         type: String,
-        default:'doctor'
+        default: 'doctor'
     },
     date: {
         type: Date,
         default: Date.now
-    },
+    }
 });
-doctorUserSchema.index({name:'text'})
+doctorUserSchema.index({ name: 'text' })
 const doctorUser = mongoose.model('doctorUserSchema', doctorUserSchema)
 // doctorUser.createCollection()
 // doctorUser.createIndexes()

@@ -45,6 +45,10 @@ const calfBornDetailSchema = new Schema({
         type: Date,
         default: Date.now
     },
+    technicianId: {
+        type: String,
+        required: true
+    },
 });
 const calfBornDetail = mongoose.model('calfBornDetailSchema', calfBornDetailSchema)
 calfBornDetail.createCollection()

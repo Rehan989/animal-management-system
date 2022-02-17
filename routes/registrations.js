@@ -9,7 +9,8 @@ const animal = require('../models/animal');
 const bullSemenAccount = require('../models/bullSemen');
 const aiDetails = require('../models/aiDetails');
 const pregnancyDetail = require('../models/pregnancyDetails')
-const calfBornDetails = require('../models/calfBornDetails')
+const calfBornDetails = require('../models/calfBornDetails');
+const technicianUser = require('../models/technicianUser');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 // Validator function
@@ -33,9 +34,7 @@ router.post('/farmer/',
         body('name', 'Enter a valid name').isLength({ min: 3 }),
         body('village', 'Please specify a village').isLength({ min: 1 }),
         body('sex', 'Please specify a gender').isLength({ min: 1 }),
-        body('mobileNo', 'Enter a valid mobile no').isLength({ min: 10 }),
-        body('rationCard', 'Enter a valid ration card no').isLength({ min: 10 }),
-        body('addhar', 'Enter a valid addhar no').isLength({ min: 12 }),
+        body('mobileNo', 'Enter a valid mobile no').isLength({ min: 10 })
     ],
     fetchUser, async (req, res) => {
         try {
@@ -62,7 +61,13 @@ router.post('/farmer/',
                 return res.status(400).json({ error: "Farmer with the same phone number already exists", success });
             }
 
-            farmerUser = await farmer.create({ name: name, village: village, mobileNo: mobileNo, rationCard: rationCard, addhar: addhar, sex: sex })
+            let technicianId = req.user.id;
+            let techUser = await technicianUser.findById(technicianId);
+            if (!techUser) {
+                success = false;
+                return res.status(400).json({ error: "Invalid technician id!", success });
+            }
+            farmerUser = await farmer.create({ technicianId, name: name, village: village, mobileNo: mobileNo, rationCard: rationCard, addhar: addhar, sex: sex })
 
             success = true;
             return res.status(204).json({ error: "Farmer Created", success });
@@ -106,8 +111,14 @@ router.post('/animal/',
                 return res.status(401).json({ error: "Farmer Not found", success })
             }
 
+            let technicianId = req.user.id;
+            let techUser = await technicianUser.findById(technicianId);
+            if (!techUser) {
+                success = false;
+                return res.status(400).json({ error: "Invalid technician id!", success });
+            }
 
-            let farmersAnimal = await animal.create({ tagNo: tagNo, farmerId: farmerId, species: species, breed: breed, age: age, noOfCalvings: noOfCalvings })
+            let farmersAnimal = await animal.create({ technicianId, tagNo: tagNo, farmerId: farmerId, species: species, breed: breed, age: age, noOfCalvings: noOfCalvings })
 
             farmerUser = await farmer.findByIdAndUpdate(farmerUser._id, { $set: { animals: [...farmerUser.animals, farmersAnimal._id] } })
             success = true;
@@ -125,6 +136,7 @@ router.post('/bullsemen/',
     [
         body('bullNo', 'Please provide a valid bull no').isNumeric(),
         body('bullId', 'Please provide a valid bull id').isNumeric(),
+        body('animalTagNo', 'Please provide a valid tag number').isNumeric(),
         body('species', 'Please specify species of the animal').isLength({ min: 1 }),
         body('breed', 'Please specify a breed').isLength({ min: 1 }),
         body('noOfDoses', 'Enter a valid no. of doses').isNumeric()
@@ -137,14 +149,13 @@ router.post('/bullsemen/',
                 return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
             }
 
-            let techUserId = req.user.id;
-            let technician = await techUser.findById(techUserId)
-            if (!technician) {
-                success = false
-                return res.status(401).json({ error: "Access Denied", success })
-            }
+            let { bullNo, bullId, date, species, breed, noOfDoses, animalTagNo } = req.body;
 
-            let { bullNo, bullId, date, species, breed, noOfDoses } = req.body;
+            let anml = await animal.findOne({ tagNo: animalTagNo });
+            if (!anml) {
+                success = false;
+                return res.status(422).json({ error: "Animal not found with the specified tag number", success });
+            }
 
             let bullSemen = await bullSemenAccount.findOne({
                 bullNo: bullNo
@@ -163,7 +174,14 @@ router.post('/bullsemen/',
                 return res.status(422).json({ error: "User with the same bull id already exists!", success })
             }
 
-            bullSemen = await bullSemenAccount.create({ bullNo: bullNo, species: species, breed: breed, noOfDoses: noOfDoses, date: date, bullId: bullId })
+            let technicianId = req.user.id;
+            let techUser = await technicianUser.findById(technicianId);
+            if (!techUser) {
+                success = false;
+                return res.status(400).json({ error: "Invalid technician id!", success });
+            }
+
+            bullSemen = await bullSemenAccount.create({ animalTagNo, technicianId, bullNo: bullNo, species: species, breed: breed, noOfDoses: noOfDoses, date: date, bullId: bullId })
 
             success = true;
             return res.status(204).json({ error: "Bull semen Created", success });
@@ -178,6 +196,7 @@ router.post('/bullsemen/',
 router.post('/aidetails/',
     [
         body('bullId', 'Enter a bull id').isNumeric(),
+        body('animalTagNo', 'Enter a bull id').isNumeric(),
     ],
     fetchUser, async (req, res) => {
         try {
@@ -187,7 +206,13 @@ router.post('/aidetails/',
                 return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
             }
 
-            let { bullId, date, freshReports } = req.body;
+            let { bullId, date, freshReports, animalTagNo } = req.body;
+
+            let anml = await animal.findOne({ tagNo: animalTagNo });
+            if (!anml) {
+                success = false;
+                return res.status(422).json({ error: "Animal not found with the specified tag number", success });
+            }
 
             let bullSemen = await bullSemenAccount.findOne({ bullId: bullId })
             if (!bullSemen) {
@@ -195,10 +220,19 @@ router.post('/aidetails/',
                 return res.status(422).json({ error: "Bull semen account with the specific id not found!", success });
             }
 
+            let technicianId = req.user.id;
+            let techUser = await technicianUser.findById(technicianId);
+            if (!techUser) {
+                success = false;
+                return res.status(400).json({ error: "Invalid technician id!", success });
+            }
+
             let aidetails = await aiDetails.create({
+                technicianId,
                 bullId: bullId,
                 date: date,
-                freshReports: freshReports
+                freshReports: freshReports,
+                animalTagNo: animalTagNo
             });
 
             success = true;
@@ -238,7 +272,15 @@ router.post('/pd/',
                 doctorName,
                 tagNo } = req.body;
 
+            let technicianId = req.user.id;
+            let techUser = await technicianUser.findById(technicianId);
+            if (!techUser) {
+                success = false;
+                return res.status(400).json({ error: "Invalid technician id!", success });
+            }
+
             let pdDetails = await pregnancyDetail.create({
+                technicianId,
                 animalTagNo,
                 bullId,
                 villageName,
@@ -291,7 +333,15 @@ router.post('/calf-details/',
                 pdDate,
                 aiDate } = req.body;
 
+            let technicianId = req.user.id;
+            let techUser = await technicianUser.findById(technicianId);
+            if (!techUser) {
+                success = false;
+                return res.status(400).json({ error: "Invalid technician id!", success });
+            }
+
             let calfBornDetail = await calfBornDetails.create({
+                technicianId,
                 animalTagNo,
                 calfBornDate,
                 sex: gender,

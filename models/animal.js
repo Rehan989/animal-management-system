@@ -33,6 +33,10 @@ const animalSchema = new Schema({
         type: Date,
         default: Date.now
     },
+    technicianId: {
+        type: String,
+        required: true
+    },
 });
 const animal = mongoose.model('animalSchema', animalSchema)
 animal.createCollection()

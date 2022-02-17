@@ -19,17 +19,19 @@ const farmerUserSchema = new Schema({
     },
     rationCard: {
         type: String,
-        required: true,
         unique: true
     },
     addhar: {
         type: String,
-        required: true,
         unique: true
     },
     sex: {
         type: String,
         required: true,
+    },
+    technicianId: {
+        type: String,
+        required: true
     },
     Date: {
         type: Date,

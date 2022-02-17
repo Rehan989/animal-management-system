@@ -50,6 +50,10 @@ const pregnancyDetailSchema = new Schema({
         type: String,
         required: true
     },
+    technicianId: {
+        type: String,
+        required: true
+    },
     date: {
         type: Date,
         default: Date.now

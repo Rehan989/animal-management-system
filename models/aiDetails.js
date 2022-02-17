@@ -9,6 +9,14 @@ const aiDetailsSchema = new Schema({
         type: String,
         required: true
     },
+    animalTagNo: {
+        type: String,
+        required: true
+    },
+    technicianId: {
+        type: String,
+        required: true
+    },
     date: {
         type: Date,
         default: Date.now
