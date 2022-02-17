@@ -9,6 +9,10 @@ const calfBornDetailSchema = new Schema({
         type: String,
         required: true
     },
+    tagNo: {
+        type: String,
+        required: true
+    },
     bullId: {
         type: String,
         required: true

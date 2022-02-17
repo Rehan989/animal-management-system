@@ -195,8 +195,7 @@ router.post('/bullsemen/',
 // Route 4: Creating ai details at '/api/register/aidetails'
 router.post('/aidetails/',
     [
-        body('bullId', 'Enter a bull id').isNumeric(),
-        body('animalTagNo', 'Enter a bull id').isNumeric(),
+        body('bullId', 'Enter a bull id').isNumeric()
     ],
     fetchUser, async (req, res) => {
         try {
@@ -206,19 +205,17 @@ router.post('/aidetails/',
                 return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
             }
 
-            let { bullId, date, freshReports, animalTagNo } = req.body;
+            let { bullId, date, freshReports } = req.body;
+            let bullSemen = await bullSemenAccount.findOne({
+                bullId: bullId
+            })
 
-            let anml = await animal.findOne({ tagNo: animalTagNo });
-            if (!anml) {
-                success = false;
-                return res.status(422).json({ error: "Animal not found with the specified tag number", success });
-            }
-
-            let bullSemen = await bullSemenAccount.findOne({ bullId: bullId })
             if (!bullSemen) {
-                success = false;
-                return res.status(422).json({ error: "Bull semen account with the specific id not found!", success });
+                success = false
+                return res.status(422).json({ error: "Bull semen account does not exists!", success })
             }
+
+            let animalTagNo = bullSemen.animalTagNo;
 
             let technicianId = req.user.id;
             let techUser = await technicianUser.findById(technicianId);
