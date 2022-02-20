@@ -57,6 +57,7 @@ router.get('/farmer', fetchUser, async (req, res) => {
     try {
         farmerName = req.query.name;
         farmerPhone = req.query.phone;
+        let technicianId = req.user.id;
         if (farmerName) {
             // If there are any validation errors, return Bad request and the errors
             if (farmerName.length <= 3) {
@@ -64,17 +65,19 @@ router.get('/farmer', fetchUser, async (req, res) => {
                 return res.status(422).json({ error: "Farmer name should be of 3 or more characters!", success })
             }
 
+
             let farmers = await farmer.find({
                 name: {
-                    $regex: new RegExp(farmerName)
-                }
+                    $regex: new RegExp(farmerName),
+                },
+                technicianId: technicianId
             },
                 {
                     _id: 0
                 }
             ).limit(5).select('-password')
             for (let i = 0; i < farmers.length; i++) {
-                let anml = await animal.find({ farmerId: farmers[i].mobileNo });
+                let anml = await animal.find({ farmerId: farmers[i].mobileNo, technicianId: technicianId });
                 farmers[i].animals = anml;
             }
             success = true;
@@ -87,7 +90,7 @@ router.get('/farmer', fetchUser, async (req, res) => {
                 return res.status(422).json({ error: "Phone number should be of 10 numbers!", success })
             }
 
-            let farmerUser = await farmer.findOne({ mobileNo: farmerPhone }).select('-password')
+            let farmerUser = await farmer.findOne({ mobileNo: farmerPhone, technicianId: technicianId }).select('-password')
             success = true;
             return res.send(JSON.stringify({ farmerUser, success }))
         }
@@ -108,16 +111,19 @@ router.get('/animals', fetchUser, async (req, res) => {
     try {
         mobileNo = req.query.farmerid;
         tagNo = req.query.tagno;
+        let technicianId = req.user.id;
         if (mobileNo) {
             let farmerUser = await farmer.findOne({
-                mobileNo
+                mobileNo,
+                technicianId: technicianId
             })
             if (!farmerUser) {
                 success = false
                 return res.status(422).json({ error: "Farmer not found!", success })
             }
             let animals = await animal.find({
-                farmerId: mobileNo
+                farmerId: mobileNo,
+                technicianId: technicianId
             })
             success = true
             return res.send(JSON.stringify({ animals, success }))
@@ -125,7 +131,8 @@ router.get('/animals', fetchUser, async (req, res) => {
         else if (tagNo) {
 
             let animals = await animal.findOne({
-                tagNo: tagNo
+                tagNo: tagNo,
+                technicianId: technicianId
             })
             success = true;
             return res.send(JSON.stringify({ animals, success }))
@@ -143,9 +150,10 @@ router.get('/animals', fetchUser, async (req, res) => {
 
 // Route 4: Getting ai details with the tag number field '/api/search/aidetails/:/'
 router.get('/aidetails', fetchUser, async (req, res) => {
+    let technicianId = req.user.id;
     try {
         let animalTagNo = req.query.tagno;
-        let aidetails = await aiDetails.findOne({ animalTagNo: animalTagNo })
+        let aidetails = await aiDetails.findOne({ animalTagNo: animalTagNo, technicianId: technicianId })
 
         success = true;
         return res.send(JSON.stringify({ aidetails, success }))
@@ -159,9 +167,10 @@ router.get('/aidetails', fetchUser, async (req, res) => {
 
 // Route 5: Getting pd details with the tag number field '/api/search/pdDetails/:/'
 router.get('/pdDetails/:tagno', fetchUser, async (req, res) => {
+    let technicianId = req.user.id;
     try {
         let tagNo = req.params.tagno;
-        let pregnancyDetails = await pdDetails.findOne({ tagNo: tagNo })
+        let pregnancyDetails = await pdDetails.findOne({ tagNo: tagNo, technicianId: technicianId })
 
         success = true;
         return res.send(JSON.stringify({ pregnancyDetails, success }))

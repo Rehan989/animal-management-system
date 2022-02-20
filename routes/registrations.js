@@ -11,6 +11,7 @@ const aiDetails = require('../models/aiDetails');
 const pregnancyDetail = require('../models/pregnancyDetails')
 const calfBornDetails = require('../models/calfBornDetails');
 const technicianUser = require('../models/technicianUser');
+const bullSemen = require('../models/bullSemen');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 // Validator function
@@ -99,6 +100,15 @@ router.post('/animal/',
 
             let { farmerId, tagNo, species, breed, age, noOfCalvings } = req.body;
 
+            let technicianId = req.user.id;
+            let techUser = await technicianUser.findById(technicianId);
+            if (!techUser) {
+                success = false;
+                return res.status(400).json({ error: "Invalid technician id!", success });
+            }
+
+
+
             let farmerAnimal = await animal.findOne({ tagNo: tagNo });
             if (farmerAnimal) {
                 success = false
@@ -106,16 +116,9 @@ router.post('/animal/',
             }
 
             let farmerUser = await farmer.findOne({ mobileNo: farmerId })
-            if (!farmerUser) {
+            if ((!farmerUser) || (farmerUser.technicianId !== technicianId)) {
                 success = false
-                return res.status(401).json({ error: "Farmer Not found", success })
-            }
-
-            let technicianId = req.user.id;
-            let techUser = await technicianUser.findById(technicianId);
-            if (!techUser) {
-                success = false;
-                return res.status(400).json({ error: "Invalid technician id!", success });
+                return res.status(401).json({ error: "Farmer Not found!", success })
             }
 
             let farmersAnimal = await animal.create({ technicianId, tagNo: tagNo, farmerId: farmerId, species: species, breed: breed, age: age, noOfCalvings: noOfCalvings })
@@ -274,6 +277,12 @@ router.post('/pd/',
             if (!techUser) {
                 success = false;
                 return res.status(400).json({ error: "Invalid technician id!", success });
+            }
+
+            let bullSemenDetails = await bullSemen.findOne({ bullId })
+            if ((!bullSemenDetails) || (bullSemenDetails.technicianId !== technicianId)) {
+                success = false;
+                return res.status(400).json({ error: "Bull semen account not found!", success });
             }
 
             let pdDetails = await pregnancyDetail.create({
