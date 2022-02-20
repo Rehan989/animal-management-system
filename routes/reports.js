@@ -22,18 +22,6 @@ async function convert_dict_to_csv(headers, obj) {
         values.push(value)
     }
 
-    // for (let i = 0; i < values.length; i++) {
-    //     let record = []
-    //     for (let k = 0; k < values[i].length; k++) {
-    //         console.log(values[i][k])
-    //         record.push(values[i][k])
-    //     }
-    //     console.log(record)
-    //     records.push(record)
-    // }
-
-    // console.log(records)
-
     const csvWriter = createCsvWriter({
         header: headers
     });
@@ -58,15 +46,28 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
         let details = [];
         let report = [];
 
+        let { village,
+            periodFrom,
+            periodTo } = req.body;
+
+        periodFrom = new Date(periodFrom);
+        periodTo = new Date(periodTo);
+
         if (reportType === "ai") {
             details = await aiDetails.find({ technicianId: technicianId });
 
             for (let i = 0; i < details.length; i++) {
+                if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
+                    continue
                 let bull = await bullSemenAccount.findOne({ bullId: details[i].bullId });
                 let animal = await animalAccount.findOne({ tagNo: bull.animalTagNo })
                 let farmer = await farmerUser.findOne({
                     mobileNo: animal.farmerId
                 })
+
+                if (farmer.village !== village) {
+                    continue
+                }
 
                 let data = [techUser.name, docUser.name, farmer.village, animal.tagNo, details[i].date, details[i].freshReports, farmer.name]
                 report.push(data)
@@ -85,11 +86,14 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
         }
 
         else if (reportType === "pd") {
-            details = await pregnancyDetails.find({ technicianId: technicianId });
-            details.map(detail => {
-                let data = [techUser.name, docUser.name, detail.villageName, detail.ownerName, detail.animalTagNo, detail.aiDate, detail.pdDate, detail.pdResult]
+            details = await pregnancyDetails.find({ technicianId: technicianId, villageName: village });
+            for (let i = 0; i < details.length; i++) {
+                if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
+                    continue
+
+                let data = [techUser.name, docUser.name, details[i].villageName, details[i].ownerName, details[i].animalTagNo, details[i].aiDate, details[i].pdDate, details[i].pdResult]
                 report.push(data)
-            })
+            }
             let headers = [
                 "ait_user_id",
                 "vd_user_id",
@@ -101,18 +105,22 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
                 "pd_result"
             ]
 
-            let csv_report = await convert_dict_to_csv(headers, report)
+            let report_csv = await convert_dict_to_csv(headers, report)
             success = true;
-            return res.send(JSON.stringify({ csv_report, success }))
+            return res.send(JSON.stringify({ report_csv, success }))
         }
         else if (reportType === "calf-born") {
-            let aidetails = await calfBornDetails.find({ technicianId: technicianId });
-            for (let i = 0; i < aidetails.length; i++) {
+            let details = await calfBornDetails.find({ technicianId: technicianId, village: village });
+            for (let i = 0; i < details.length; i++) {
+                if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
+                    continue
+
                 let bull = await bullSemen.findOne({
-                    bullId: aidetails[i].bullId
+                    bullId: details[i].bullId
                 })
 
-                let data = [techUser.name, docUser.name, aidetails[i].village, aidetails[i].owner, bull.animalTagNo, aidetails[i].aiDate, aidetails[i].pdDate, aidetails[i].date, aidetails[i].sex, aidetails[i].easeOfCalvings, aidetails[i].tagNo]
+
+                let data = [techUser.name, docUser.name, details[i].village, details[i].owner, bull.animalTagNo, details[i].aiDate, details[i].pdDate, details[i].date, details[i].sex, details[i].easeOfCalvings, details[i].tagNo]
                 report.push(data)
             }
             let headers = [
@@ -129,9 +137,9 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
                 "calf_tag_no"
             ]
 
-            let csv_report = await convert_dict_to_csv(headers, report)
+            let report_csv = await convert_dict_to_csv(headers, report)
             success = true;
-            return res.send(JSON.stringify({ csv_report, success }))
+            return res.send(JSON.stringify({ report_csv, success }))
         }
         else {
             success = false;
@@ -163,6 +171,13 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
         let details = [];
         let report = [];
 
+        let { village,
+            periodFrom,
+            periodTo } = req.body;
+
+        periodFrom = new Date(periodFrom);
+        periodTo = new Date(periodTo);
+
         if (reportType === "ai") {
 
             for (let k = 0; k < docUser.technicians.length; k++) {
@@ -175,6 +190,13 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                     let farmer = await farmerUser.findOne({
                         mobileNo: animal.farmerId
                     })
+
+                    if (farmer.village !== village) {
+                        continue
+                    }
+
+                    if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
+                        continue
 
                     let data = [docUser.technicians[k].name, docUser.name, farmer.village, animal.tagNo, details[i].date, details[i].freshReports, farmer.name]
 
@@ -191,16 +213,20 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                 "fresh_repeat",
                 "farmer_name"
             ]
-            let csv_report = await convert_dict_to_csv(headers, report)
+            let report_csv = await convert_dict_to_csv(headers, report)
             success = true;
-            return res.send(JSON.stringify({ csv_report, success }))
+            return res.send(JSON.stringify({ report_csv, success }))
         }
         else if (reportType === "pd") {
             for (let k = 0; k < docUser.technicians.length; k++) {
 
-                details = await pregnancyDetails.find({ technicianId: docUser.technicians[k]._id });
+                details = await pregnancyDetails.find({ technicianId: docUser.technicians[k]._id, villageName: village });
 
                 details.map(detail => {
+
+                    if (!((periodFrom.getTime() < detail.date.getTime()) && (detail.date.getTime() < periodTo.getTime())))
+                        return
+
                     let data = [docUser.technicians[k].name, docUser.name, detail.villageName, detail.ownerName, detail.animalTagNo, detail.aiDate, detail.pdDate, detail.pdResult]
 
                     report.push(data)
@@ -218,21 +244,23 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                 "date_of_pd",
                 "pd_result"
             ]
-            let csv_report = await convert_dict_to_csv(headers, report)
+            let report_csv = await convert_dict_to_csv(headers, report)
             success = true;
-            return res.send(JSON.stringify({ csv_report, success }))
+            return res.send(JSON.stringify({ report_csv, success }))
         }
         else if (reportType === "calf-born") {
-            let ait_user_id = [], vd_user_id = [], name_of_the_villages = [], farmer_name = [], tag_no = [], ai_date = [], date_of_pd = [], date_of_calf_born = [], calf_sex = [], ease_of_calvings = [], calf_tag_no = [];
 
             for (let k = 0; k < docUser.technicians.length; k++) {
-                let aidetails = await calfBornDetails.find({ technicianId: docUser.technicians[k]._id });
-                for (let i = 0; i < aidetails.length; i++) {
+                let details = await calfBornDetails.find({ technicianId: docUser.technicians[k]._id, village: village });
+                for (let i = 0; i < details.length; i++) {
                     let bull = await bullSemen.findOne({
-                        bullId: aidetails[i].bullId
+                        bullId: details[i].bullId
                     })
 
-                    let data = [docUser.technicians[k].name, docUser.name, aidetails[i].village, aidetails[i].owner, bull.animalTagNo, aidetails[i].aiDate, aidetails[i].pdDate, aidetails[i].date, aidetails[i].sex, aidetails[i].easeOfCalvings, aidetails[i].tagNo];
+                    if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
+                        continue
+
+                    let data = [docUser.technicians[k].name, docUser.name, details[i].village, details[i].owner, bull.animalTagNo, details[i].aiDate, details[i].pdDate, details[i].date, details[i].sex, details[i].easeOfCalvings, details[i].tagNo];
 
                     report.push(data)
                 }
@@ -251,9 +279,9 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                 "ease_of_calvings",
                 "calf_tag_no"
             ]
-            let csv_report = await convert_dict_to_csv(headers, report)
+            let report_csv = await convert_dict_to_csv(headers, report)
             success = true;
-            return res.send(JSON.stringify({ csv_report, success }))
+            return res.send(JSON.stringify({ report_csv, success }))
         }
         else {
             success = false;
