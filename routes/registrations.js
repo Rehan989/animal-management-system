@@ -198,7 +198,8 @@ router.post('/bullsemen/',
 // Route 4: Creating ai details at '/api/register/aidetails'
 router.post('/aidetails/',
     [
-        body('bullId', 'Enter a bull id').isNumeric()
+        body('bullId', 'Enter a bull id').isNumeric(),
+        body('tagNo', 'Enter a valid tag number!').isNumeric(),
     ],
     fetchUser, async (req, res) => {
         try {
@@ -208,7 +209,7 @@ router.post('/aidetails/',
                 return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
             }
 
-            let { bullId, date, freshReports } = req.body;
+            let { bullId, date, freshReports, tagNo } = req.body;
             let bullSemen = await bullSemenAccount.findOne({
                 bullId: bullId
             })
@@ -227,10 +228,17 @@ router.post('/aidetails/',
                 return res.status(400).json({ error: "Invalid technician id!", success });
             }
 
-            let aidetails = await aiDetails.create({
+            let aidetails = await aiDetails.findOne({ tagNo: tagNo });
+            if (aidetails) {
+                success = false
+                return res.status(400).json({ error: "Ai detail with the same tag number already exists!", success });
+            }
+
+            aidetails = await aiDetails.create({
                 technicianId,
                 bullId: bullId,
                 date: date,
+                tagNo: tagNo,
                 freshReports: freshReports,
                 animalTagNo: animalTagNo
             });
