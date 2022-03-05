@@ -6,10 +6,6 @@ const bullSemenSchema = new Schema({
         required: true,
         unique: true
     },
-    animalTagNo: {
-        type: String,
-        required: true
-    },
     bullId: {
         type: String,
         required: true,

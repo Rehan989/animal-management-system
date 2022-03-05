@@ -5,6 +5,10 @@ const aiDetailsSchema = new Schema({
         type: String,
         required: true
     },
+    animalTagNo: {
+        type: String,
+        required: true
+    },
     tagNo: {
         type: String,
         required: true,

@@ -59,8 +59,8 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
             for (let i = 0; i < details.length; i++) {
                 if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
                     continue
-                let bull = await bullSemenAccount.findOne({ bullId: details[i].bullId });
-                let animal = await animalAccount.findOne({ tagNo: bull.animalTagNo })
+                // let bull = await bullSemenAccount.findOne({ bullId: details[i].bullId });
+                let animal = await animalAccount.findOne({ tagNo: details[i].animalTagNo })
                 let farmer = await farmerUser.findOne({
                     mobileNo: animal.farmerId
                 })
@@ -185,8 +185,8 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                 details = await aiDetails.find({ technicianId: docUser.technicians[k]._id });
 
                 for (let i = 0; i < details.length; i++) {
-                    let bull = await bullSemenAccount.findOne({ bullId: details[i].bullId });
-                    let animal = await animalAccount.findOne({ tagNo: bull.animalTagNo })
+                    // let bull = await bullSemenAccount.findOne({ bullId: details[i].bullId });
+                    let animal = await animalAccount.findOne({ tagNo: details[i].animalTagNo })
                     let farmer = await farmerUser.findOne({
                         mobileNo: animal.farmerId
                     })

@@ -139,7 +139,6 @@ router.post('/bullsemen/',
     [
         body('bullNo', 'Please provide a valid bull no').isNumeric(),
         body('bullId', 'Please provide a valid bull id').isNumeric(),
-        body('animalTagNo', 'Please provide a valid tag number').isNumeric(),
         body('species', 'Please specify species of the animal').isLength({ min: 1 }),
         body('breed', 'Please specify a breed').isLength({ min: 1 }),
         body('noOfDoses', 'Enter a valid no. of doses').isNumeric()
@@ -152,13 +151,7 @@ router.post('/bullsemen/',
                 return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
             }
 
-            let { bullNo, bullId, date, species, breed, noOfDoses, animalTagNo } = req.body;
-
-            let anml = await animal.findOne({ tagNo: animalTagNo });
-            if (!anml) {
-                success = false;
-                return res.status(422).json({ error: "Animal not found with the specified tag number", success });
-            }
+            let { bullNo, bullId, date, species, breed, noOfDoses } = req.body;
 
             let bullSemen = await bullSemenAccount.findOne({
                 bullNo: bullNo
@@ -184,7 +177,7 @@ router.post('/bullsemen/',
                 return res.status(400).json({ error: "Invalid technician id!", success });
             }
 
-            bullSemen = await bullSemenAccount.create({ animalTagNo, technicianId, bullNo: bullNo, species: species, breed: breed, noOfDoses: noOfDoses, date: date, bullId: bullId })
+            bullSemen = await bullSemenAccount.create({ technicianId, bullNo: bullNo, species: species, breed: breed, noOfDoses: noOfDoses, date: date, bullId: bullId })
 
             success = true;
             return res.status(204).json({ error: "Bull semen Created", success });
@@ -198,8 +191,9 @@ router.post('/bullsemen/',
 // Route 4: Creating ai details at '/api/register/aidetails'
 router.post('/aidetails/',
     [
-        body('bullId', 'Enter a bull id').isNumeric(),
-        body('tagNo', 'Enter a valid tag number!').isNumeric(),
+        body('bullId', 'Enter a bull id').isLength({ min: 1 }),
+        body('tagNo', 'Enter a valid tag number!').isLength({ min: 1 }),
+        body('animalTagNo', 'Please provide a valid tag number').isLength({ min: 1 }),
     ],
     fetchUser, async (req, res) => {
         try {
@@ -209,17 +203,13 @@ router.post('/aidetails/',
                 return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
             }
 
-            let { bullId, date, freshReports, tagNo } = req.body;
-            let bullSemen = await bullSemenAccount.findOne({
-                bullId: bullId
-            })
+            let { bullId, date, freshReports, tagNo, animalTagNo } = req.body;
 
-            if (!bullSemen) {
-                success = false
-                return res.status(422).json({ error: "Bull semen account does not exists!", success })
+            let anml = await animal.findOne({ tagNo: animalTagNo });
+            if (!anml) {
+                success = false;
+                return res.status(422).json({ error: "Animal not found with the specified tag number", success });
             }
-
-            let animalTagNo = bullSemen.animalTagNo;
 
             let technicianId = req.user.id;
             let techUser = await technicianUser.findById(technicianId);
