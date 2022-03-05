@@ -13,10 +13,6 @@ const calfBornDetailSchema = new Schema({
         type: String,
         required: true
     },
-    bullId: {
-        type: String,
-        required: true
-    },
     breed: {
         type: String,
         required: true
@@ -38,10 +34,6 @@ const calfBornDetailSchema = new Schema({
         required: true
     },
     aiDate: {
-        type: String,
-        required: true
-    },
-    pdDate: {
         type: String,
         required: true
     },

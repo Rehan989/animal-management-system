@@ -192,7 +192,6 @@ router.post('/bullsemen/',
 router.post('/aidetails/',
     [
         body('bullId', 'Enter a bull id').isLength({ min: 1 }),
-        body('tagNo', 'Enter a valid tag number!').isLength({ min: 1 }),
         body('animalTagNo', 'Please provide a valid tag number').isLength({ min: 1 }),
     ],
     fetchUser, async (req, res) => {
@@ -203,12 +202,20 @@ router.post('/aidetails/',
                 return res.status(400).json({ errors: errors.array(), error: "Validation Error!", success });
             }
 
-            let { bullId, date, freshReports, tagNo, animalTagNo } = req.body;
+            let { bullId, date, freshReports, animalTagNo } = req.body;
 
             let anml = await animal.findOne({ tagNo: animalTagNo });
             if (!anml) {
                 success = false;
                 return res.status(422).json({ error: "Animal not found with the specified tag number", success });
+            }
+            let bullSemen = await bullSemenAccount.findOne({
+                bullId: bullId
+            })
+
+            if (!bullSemen) {
+                success = false
+                return res.status(422).json({ error: "Bull semen account with the specified bull id does not exists!", success })
             }
 
             let technicianId = req.user.id;
@@ -218,17 +225,10 @@ router.post('/aidetails/',
                 return res.status(400).json({ error: "Invalid technician id!", success });
             }
 
-            let aidetails = await aiDetails.findOne({ tagNo: tagNo });
-            if (aidetails) {
-                success = false
-                return res.status(400).json({ error: "Ai detail with the same tag number already exists!", success });
-            }
-
-            aidetails = await aiDetails.create({
+            let aidetails = await aiDetails.create({
                 technicianId,
                 bullId: bullId,
                 date: date,
-                tagNo: tagNo,
                 freshReports: freshReports,
                 animalTagNo: animalTagNo
             });
@@ -242,7 +242,7 @@ router.post('/aidetails/',
         }
     })
 
-// Route 4: Creating ai details at '/api/register/aidetails'
+// Route 4: Creating pd details at '/api/register/pd'
 router.post('/pd/',
     [
         body('animalTagNo', 'Tag number should be a integer field!').isNumeric(),

@@ -9,11 +9,6 @@ const pregnancyDetailSchema = new Schema({
         type: String,
         required: true
     },
-    tagNo: {
-        type: Number,
-        required: true,
-        unique: true
-    },
     villageName: {
         type: String,
         required: true

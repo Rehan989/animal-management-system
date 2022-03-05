@@ -8,9 +8,7 @@ const calfBornDetails = require('../models/calfBornDetails');
 const technicianUser = require('../models/technicianUser');
 const doctorUser = require('../models/doctorUser');
 const animalAccount = require('../models/animal');
-const bullSemenAccount = require('../models/bullSemen');
 const farmerUser = require('../models/farmer');
-const bullSemen = require('../models/bullSemen');
 const createCsvWriter = require('csv-writer').createArrayCsvStringifier;
 
 let success = false;
@@ -68,8 +66,7 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
                 if (farmer.village !== village) {
                     continue
                 }
-
-                let data = [techUser.name, docUser.name, farmer.village, animal.tagNo, details[i].date, details[i].freshReports, farmer.name]
+                let data = [techUser.name, docUser.name, farmer.village, animal.tagNo, details[i].date.toISOString().replaceAll('-', '/').substring(0, 10), details[i].freshReports, farmer.name]
                 report.push(data)
             }
 
@@ -91,7 +88,7 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
                 if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
                     continue
 
-                let data = [techUser.name, docUser.name, details[i].villageName, details[i].ownerName, details[i].animalTagNo, details[i].aiDate, details[i].pdDate, details[i].pdResult]
+                let data = [techUser.name, docUser.name, details[i].villageName, details[i].ownerName, details[i].animalTagNo, details[i].aiDate.replaceAll('-', '/').substring(0, 10), details[i].pdDate.replaceAll('-', '/').substring(0, 10), details[i].pdResult]
                 report.push(data)
             }
             let headers = [
@@ -115,12 +112,7 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
                 if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
                     continue
 
-                let bull = await bullSemen.findOne({
-                    bullId: details[i].bullId
-                })
-
-
-                let data = [techUser.name, docUser.name, details[i].village, details[i].owner, bull.animalTagNo, details[i].aiDate, details[i].pdDate, details[i].date, details[i].sex, details[i].easeOfCalvings, details[i].tagNo]
+                let data = [techUser.name, docUser.name, details[i].village, details[i].owner, details[i].animalTagNo, details[i].aiDate.replaceAll('-', '/').substring(0, 10), details[i].date.toISOString().replaceAll('-', '/').substring(0, 10), details[i].sex, details[i].easeOfCalvings, details[i].tagNo]
                 report.push(data)
             }
             let headers = [
@@ -130,7 +122,6 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
                 "farmer_name",
                 "tag_no",
                 "ai_date",
-                "date_of_pd",
                 "date_of_calf_born",
                 "calf_sex",
                 "ease_of_calvings",
@@ -198,7 +189,7 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                     if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
                         continue
 
-                    let data = [docUser.technicians[k].name, docUser.name, farmer.village, animal.tagNo, details[i].date, details[i].freshReports, farmer.name]
+                    let data = [docUser.technicians[k].name, docUser.name, farmer.village, animal.tagNo, details[i].date.toISOString().replaceAll('-', '/').substring(0, 10), details[i].freshReports, farmer.name]
 
                     report.push(data)
                 }
@@ -227,7 +218,7 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                     if (!((periodFrom.getTime() < detail.date.getTime()) && (detail.date.getTime() < periodTo.getTime())))
                         return
 
-                    let data = [docUser.technicians[k].name, docUser.name, detail.villageName, detail.ownerName, detail.animalTagNo, detail.aiDate, detail.pdDate, detail.pdResult]
+                    let data = [docUser.technicians[k].name, docUser.name, detail.villageName, detail.ownerName, detail.animalTagNo, detail.aiDate.replaceAll('-', '/').substring(0, 10), detail.pdDate.replaceAll('-', '/').substring(0, 10), detail.pdResult]
 
                     report.push(data)
                 })
@@ -253,14 +244,11 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
             for (let k = 0; k < docUser.technicians.length; k++) {
                 let details = await calfBornDetails.find({ technicianId: docUser.technicians[k]._id, village: village });
                 for (let i = 0; i < details.length; i++) {
-                    let bull = await bullSemen.findOne({
-                        bullId: details[i].bullId
-                    })
 
                     if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
                         continue
 
-                    let data = [docUser.technicians[k].name, docUser.name, details[i].village, details[i].owner, bull.animalTagNo, details[i].aiDate, details[i].pdDate, details[i].date, details[i].sex, details[i].easeOfCalvings, details[i].tagNo];
+                    let data = [docUser.technicians[k].name, docUser.name, details[i].village, details[i].owner, details[i].animalTagNo, details[i].aiDate.substring(0, 10).replaceAll('-', '/'), details[i].date.toISOString().substring(0, 10).replaceAll('-', '/'), details[i].sex, details[i].easeOfCalvings, details[i].tagNo];
 
                     report.push(data)
                 }
@@ -273,7 +261,6 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                 "farmer_name",
                 "tag_no",
                 "ai_date",
-                "date_of_pd",
                 "date_of_calf_born",
                 "calf_sex",
                 "ease_of_calvings",

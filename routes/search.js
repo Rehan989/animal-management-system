@@ -24,7 +24,7 @@ router.get('/doctor', fetchUser, async (req, res) => {
 
             let doctors = await doctorUser.find({
                 name: {
-                    $regex: new RegExp(doctorName)
+                    $regex: new RegExp(doctorName, 'i'),
                 }
             },
                 {
@@ -68,7 +68,7 @@ router.get('/farmer', fetchUser, async (req, res) => {
 
             let farmers = await farmer.find({
                 name: {
-                    $regex: new RegExp(farmerName),
+                    $regex: new RegExp(farmerName, 'i'),
                 },
                 technicianId: technicianId
             },
@@ -166,19 +166,19 @@ router.get('/aidetails', fetchUser, async (req, res) => {
 })
 
 // Route 5: Getting pd details with the tag number field '/api/search/pdDetails/:/'
-router.get('/pdDetails/:tagno', fetchUser, async (req, res) => {
-    let technicianId = req.user.id;
-    try {
-        let tagNo = req.params.tagno;
-        let pregnancyDetails = await pdDetails.findOne({ tagNo: tagNo, technicianId: technicianId })
+// router.get('/pdDetails/:tagno', fetchUser, async (req, res) => {
+//     let technicianId = req.user.id;
+//     try {
+//         let tagNo = req.params.tagno;
+//         let pregnancyDetails = await pdDetails.findOne({ tagNo: tagNo, technicianId: technicianId })
 
-        success = true;
-        return res.send(JSON.stringify({ pregnancyDetails, success }))
+//         success = true;
+//         return res.send(JSON.stringify({ pregnancyDetails, success }))
 
-    } catch (error) {
-        console.error(error.message);
-        success = false
-        return res.status(500).json({ error: "Internal Server Error", success });
-    }
-})
+//     } catch (error) {
+//         console.error(error.message);
+//         success = false
+//         return res.status(500).json({ error: "Internal Server Error", success });
+//     }
+// })
 module.exports = router;
