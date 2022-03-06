@@ -6,6 +6,7 @@ const farmer = require('../models/farmer');
 const animal = require('../models/animal');
 const aiDetails = require('../models/aiDetails');
 const pdDetails = require('../models/pregnancyDetails');
+const bullAccount = require('../models/bullSemen')
 let success = false;
 
 
@@ -165,7 +166,24 @@ router.get('/aidetails', fetchUser, async (req, res) => {
     }
 })
 
-// Route 5: Getting pd details with the tag number field '/api/search/pdDetails/:/'
+// Route 5: Getting bull id with the tag number of technician '/api/search/bullid/'
+router.get('/bull', fetchUser, async (req, res) => {
+    let technicianId = req.user.id;
+    try {
+        let bullAccounts = await bullAccount.find({ technicianId: technicianId })
+
+        success = true;
+        return res.send(JSON.stringify({ bullAccounts, success }))
+
+    } catch (error) {
+        console.error(error.message);
+        success = false
+        return res.status(500).json({ error: "Internal Server Error", success });
+    }
+})
+
+
+// Route 6: Getting pd details with the tag number field '/api/search/pdDetails/:/'
 // router.get('/pdDetails/:tagno', fetchUser, async (req, res) => {
 //     let technicianId = req.user.id;
 //     try {
