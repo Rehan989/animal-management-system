@@ -169,6 +169,7 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
         periodFrom = new Date(periodFrom);
         periodTo = new Date(periodTo);
 
+
         if (reportType === "ai") {
 
             for (let k = 0; k < docUser.technicians.length; k++) {
@@ -182,7 +183,7 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                         mobileNo: animal.farmerId
                     })
 
-                    if (farmer.village !== village) {
+                    if (farmer.village !== village && village !== "") {
                         continue
                     }
 
@@ -210,8 +211,10 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
         }
         else if (reportType === "pd") {
             for (let k = 0; k < docUser.technicians.length; k++) {
-
-                details = await pregnancyDetails.find({ technicianId: docUser.technicians[k]._id, villageName: village });
+                if (village)
+                    details = await pregnancyDetails.find({ technicianId: docUser.technicians[k]._id, villageName: village });
+                else
+                    details = await pregnancyDetails.find({ technicianId: docUser.technicians[k]._id });
 
                 details.map(detail => {
 
@@ -242,7 +245,11 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
         else if (reportType === "calf-born") {
 
             for (let k = 0; k < docUser.technicians.length; k++) {
-                let details = await calfBornDetails.find({ technicianId: docUser.technicians[k]._id, village: village });
+                let details = []
+                if (village)
+                    details = await calfBornDetails.find({ technicianId: docUser.technicians[k]._id, village: village });
+                else
+                    details = await calfBornDetails.find({ technicianId: docUser.technicians[k]._id });
                 for (let i = 0; i < details.length; i++) {
 
                     if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
