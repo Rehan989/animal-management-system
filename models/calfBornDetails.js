@@ -13,6 +13,10 @@ const calfBornDetailSchema = new Schema({
         type: String,
         required: true
     },
+    tagNo: {
+        type: String,
+        required: true
+    },
     breed: {
         type: String,
         required: true
