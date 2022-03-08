@@ -9,7 +9,7 @@ const calfBornDetailSchema = new Schema({
         type: String,
         required: true
     },
-    tagNo: {
+    animalTagNo: {
         type: String,
         required: true
     },

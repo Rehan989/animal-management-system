@@ -74,7 +74,7 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
             let report_csv = await convert_dict_to_csv(["ait_user_id",
                 "vd_user_id",
                 "name_of_the_village",
-                "tag_no",
+                "animal_tag_no",
                 "ai_date",
                 "fresh_repeat",
                 "farmer_name"], report);
@@ -101,7 +101,7 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
                 "vd_user_id",
                 "name_of_the_villages",
                 "farmer_name",
-                "tag_no",
+                "animal_tag_no",
                 "ai_date",
                 "date_of_pd",
                 "pd_result"
@@ -121,7 +121,11 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
                 if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
                     continue
 
-                let data = [techUser.name, docUser.name, details[i].village, details[i].owner, details[i].animalTagNo, details[i].aiDate.replaceAll('-', '/').substring(0, 10), details[i].date.toISOString().replaceAll('-', '/').substring(0, 10), details[i].sex, details[i].easeOfCalvings, details[i].tagNo]
+                let data = [techUser.name,
+                docUser.name,
+                details[i].village,
+                details[i].owner,
+                details[i].animalTagNo, details[i].aiDate.replaceAll('-', '/').substring(0, 10), details[i].date.toISOString().replaceAll('-', '/').substring(0, 10), details[i].sex, details[i].easeOfCalvings]
                 report.push(data)
             }
             let headers = [
@@ -129,12 +133,11 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
                 "vd_user_id",
                 "name_of_the_villages",
                 "farmer_name",
-                "tag_no",
+                "animal_tag_no",
                 "ai_date",
                 "date_of_calf_born",
                 "calf_sex",
                 "ease_of_calvings",
-                "calf_tag_no"
             ]
 
             let report_csv = await convert_dict_to_csv(headers, report)
@@ -209,7 +212,7 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                 "ait_user_id",
                 "vd_user_id",
                 "name_of_the_village",
-                "tag_no",
+                "animal_tag_no",
                 "ai_date",
                 "fresh_repeat",
                 "farmer_name"
@@ -242,7 +245,7 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                 "vd_user_id",
                 "name_of_the_villages",
                 "farmer_name",
-                "tag_no",
+                "animal_tag_no",
                 "ai_date",
                 "date_of_pd",
                 "pd_result"
@@ -264,7 +267,7 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                     if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
                         continue
 
-                    let data = [docUser.technicians[k].name, docUser.name, details[i].village, details[i].owner, details[i].animalTagNo, details[i].aiDate.substring(0, 10).replaceAll('-', '/'), details[i].date.toISOString().substring(0, 10).replaceAll('-', '/'), details[i].sex, details[i].easeOfCalvings, details[i].tagNo];
+                    let data = [docUser.technicians[k].name, docUser.name, details[i].village, details[i].owner, details[i].animalTagNo, details[i].aiDate.substring(0, 10).replaceAll('-', '/'), details[i].date.toISOString().substring(0, 10).replaceAll('-', '/'), details[i].sex, details[i].easeOfCalvings];
 
                     report.push(data)
                 }
@@ -275,12 +278,11 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                 "vd_user_id",
                 "name_of_the_villages",
                 "farmer_name",
-                "tag_no",
+                "animal_tag_no",
                 "ai_date",
                 "date_of_calf_born",
                 "calf_sex",
                 "ease_of_calvings",
-                "calf_tag_no"
             ]
             let report_csv = await convert_dict_to_csv(headers, report)
             success = true;
