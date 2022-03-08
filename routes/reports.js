@@ -63,9 +63,10 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
                     mobileNo: animal.farmerId
                 })
 
-                if (farmer.village !== village) {
+                if (farmer.village !== village && village !== "") {
                     continue
                 }
+
                 let data = [techUser.name, docUser.name, farmer.village, animal.tagNo, details[i].date.toISOString().replaceAll('-', '/').substring(0, 10), details[i].freshReports, farmer.name]
                 report.push(data)
             }
@@ -83,7 +84,11 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
         }
 
         else if (reportType === "pd") {
-            details = await pregnancyDetails.find({ technicianId: technicianId, villageName: village });
+            if (village)
+                details = await pregnancyDetails.find({ technicianId: technicianId, villageName: village });
+            else
+                details = await pregnancyDetails.find({ technicianId: technicianId });
+
             for (let i = 0; i < details.length; i++) {
                 if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
                     continue
@@ -107,7 +112,11 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
             return res.send(JSON.stringify({ report_csv, success }))
         }
         else if (reportType === "calf-born") {
-            let details = await calfBornDetails.find({ technicianId: technicianId, village: village });
+            if (village)
+                details = await calfBornDetails.find({ technicianId: technicianId, village: village });
+            else
+                details = await calfBornDetails.find({ technicianId: technicianId });
+
             for (let i = 0; i < details.length; i++) {
                 if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
                     continue
