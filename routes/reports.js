@@ -8,6 +8,7 @@ const calfBornDetails = require('../models/calfBornDetails');
 const technicianUser = require('../models/technicianUser');
 const doctorUser = require('../models/doctorUser');
 const animalAccount = require('../models/animal');
+const bullSemen = require('../models/bullSemen')
 const farmerUser = require('../models/farmer');
 const createCsvWriter = require('csv-writer').createArrayCsvStringifier;
 
@@ -62,22 +63,28 @@ router.post('/technician/:reportType', fetchUser, async (req, res) => {
                 let farmer = await farmerUser.findOne({
                     mobileNo: animal.farmerId
                 })
+                let bullSemenAccount = await bullSemen.findOne({ bullId: details[i].bullId });
 
                 if (farmer.village !== village && village !== "") {
                     continue
                 }
 
-                let data = [techUser.name, docUser.name, farmer.village, animal.tagNo, details[i].date.toISOString().replaceAll('-', '/').substring(0, 10), details[i].freshReports, farmer.name]
+                let data = [techUser.name, docUser.name, farmer.village, animal.tagNo, details[i].date.toISOString().replaceAll('-', '/').substring(0, 10), details[i].freshReports, farmer.name, bullSemenAccount.species, bullSemenAccount.breed, bullSemenAccount.bullId]
                 report.push(data)
             }
 
-            let report_csv = await convert_dict_to_csv(["ait_user_id",
+            let report_csv = await convert_dict_to_csv([
+                "ait_user_id",
                 "vd_user_id",
                 "name_of_the_village",
                 "animal_tag_no",
                 "ai_date",
                 "fresh_repeat",
-                "farmer_name"], report);
+                "farmer_name",
+                "species",
+                "breed",
+                "bullId"
+            ], report);
 
             success = true;
             return res.send(JSON.stringify({ report_csv, success }))
