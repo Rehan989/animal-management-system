@@ -202,6 +202,7 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                     let farmer = await farmerUser.findOne({
                         mobileNo: animal.farmerId
                     })
+                    let bullSemenAccount = await bullSemen.findOne({ bullId: details[i].bullId });
 
                     if (farmer.village !== village && village !== "") {
                         continue
@@ -210,7 +211,7 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                     if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
                         continue
 
-                    let data = [docUser.technicians[k].name, docUser.name, farmer.village, animal.tagNo, details[i].date.toISOString().replaceAll('-', '/').substring(0, 10), details[i].freshReports, farmer.name]
+                    let data = [docUser.technicians[k].name, docUser.name, farmer.village, animal.tagNo, details[i].date.toISOString().replaceAll('-', '/').substring(0, 10), details[i].freshReports, farmer.name, bullSemenAccount.species, bullSemenAccount.breed, bullSemenAccount.bullId]
 
                     report.push(data)
                 }
@@ -223,7 +224,10 @@ router.post('/doctor/:reportType', fetchUser, async (req, res) => {
                 "animal_tag_no",
                 "ai_date",
                 "fresh_repeat",
-                "farmer_name"
+                "farmer_name",
+                "species",
+                "breed",
+                "bullId"
             ]
             let report_csv = await convert_dict_to_csv(headers, report)
             success = true;
