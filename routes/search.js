@@ -54,10 +54,12 @@ router.get('/doctor', fetchUser, async (req, res) => {
 
 // Route 2: Getting Farmer with his name '/api/search/farmer/:farmerName/'
 router.get('/farmer', fetchUser, async (req, res) => {
-    let farmerName = "";
+    let farmerName = "", animalTagNo = '', farmerPhone = "";
     try {
         farmerName = req.query.name;
         farmerPhone = req.query.phone;
+        animalTagNo = req.query.animaltagno;
+
         let technicianId = req.user.id;
         if (farmerName) {
             // If there are any validation errors, return Bad request and the errors
@@ -94,6 +96,22 @@ router.get('/farmer', fetchUser, async (req, res) => {
             let farmerUser = await farmer.findOne({ mobileNo: farmerPhone, technicianId: technicianId }).select('-password')
             success = true;
             return res.send(JSON.stringify({ farmerUser, success }))
+        }
+        else if (animalTagNo) {
+            // If there are any validation errors, return Bad request and the errors
+            let animalData = await animal.findOne({ tagNo: animalTagNo });
+            if (!animalData) {
+                success = false
+                return res.status(422).json({ error: "No animal found with the following animal tag number!", success })
+            }
+
+            let farmerUser = await farmer.findOne({ animals: animalData._id, technicianId: technicianId }).select('-password')
+
+            let anml = await animal.find({ farmerId: farmerUser.mobileNo, technicianId: technicianId });
+            farmerUser.animals = anml;
+            success = true;
+
+            return res.send(JSON.stringify({ farmers: [farmerUser], success }))
         }
         else {
             success = false
@@ -135,7 +153,18 @@ router.get('/animals', fetchUser, async (req, res) => {
                 tagNo: tagNo,
                 technicianId: technicianId
             })
-            success = true;
+
+            if (animals) {
+                // let anml = await animal.find({ farmerId: animals.farmerId, technicianId: technicianId });
+
+                // animals.farmer = await farmer.findOne({ mobileNo: animals.farmerId })
+                // animals.farmer.animals = anml;
+                success = true;
+            }
+            else {
+                success = false
+                animals = [];
+            }
             return res.send(JSON.stringify({ animals, success }))
         }
         else {
