@@ -17,12 +17,39 @@ router.get('/ai', fetchUser, async (req, res) => {
     let periodFrom = req.query.periodfrom;
     let periodTo = req.query.periodto;
     try {
-        let aiFreshCounts = await aiDetails.find({ technicianId: technicianId, freshReports: "fresh", village: village }).count();
-        let aiR1Counts = await aiDetails.find({ technicianId: technicianId, freshReports: "repeat-r1", village: village }).count();
-        let aiR2Counts = await aiDetails.find({ technicianId: technicianId, freshReports: "repeat-r2", village: village }).count();
+        let aiFreshCounts = [], aiR1Counts = [], aiR2Counts = [];
+        let details = await aiDetails.find({ technicianId: technicianId });
+
+        for (let i = 0; i < details.length; i++) {
+            if (periodFrom && periodTo) {
+                periodFrom = new Date(req.query.periodfrom);
+                periodTo = new Date(req.query.periodto);
+                if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
+                    continue
+            }
+
+            let anml = await animal.findOne({ tagNo: details[i].animalTagNo })
+            let farmerUser;
+            if (village)
+                farmerUser = await farmer.findOne({ mobileNo: anml.farmerId, village: village });
+            else
+                farmerUser = await farmer.findOne({ mobileNo: anml.farmerId });
+
+            if (!anml || !farmerUser) {
+                continue
+            }
+
+            if (details[i].freshReports === "fresh")
+                aiFreshCounts.push(details[i])
+            else if (details[i].freshReports === "repeat-r1")
+                aiR1Counts.push(details[i])
+            else if (details[i].freshReports === "repeat-r2")
+                aiR2Counts.push(details[i])
+
+        }
 
         success = true;
-        return res.send(JSON.stringify({ freshCounts: aiFreshCounts, r1Counts: aiR1Counts, r2Counts: aiR2Counts, success }))
+        return res.send(JSON.stringify({ freshCounts: aiFreshCounts.length, r1Counts: aiR1Counts.length, r2Counts: aiR2Counts.length, success }))
 
     } catch (error) {
         console.error(error.message);
@@ -38,11 +65,31 @@ router.get('/pd', fetchUser, async (req, res) => {
     let periodFrom = req.query.periodfrom;
     let periodTo = req.query.periodto;
     try {
-        let pdPregnantCount = await pdDetails.find({ technicianId: technicianId, pdResult: 'pregnant', village }).count();
-        let pdNonPregnantCount = await pdDetails.find({ technicianId: technicianId, pdResult: 'non-pregnant', village }).count();
+        let pdPregnantCount = [], pdNonPregnantCount = [];
+        let details;
+        if (village)
+            details = await pdDetails.find({ technicianId: technicianId, villageName: village });
+        else
+            details = await pdDetails.find({ technicianId: technicianId });
+        for (let i = 0; i < details.length; i++) {
+
+            if (periodFrom && periodTo) {
+                periodFrom = new Date(req.query.periodfrom);
+                periodTo = new Date(req.query.periodto);
+                if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
+                    continue
+            }
+
+            if (details[i].pdResult === "pregnant") {
+                pdPregnantCount.push(details[i]);
+            }
+            else if (details[i].pdResult === "non-pregnant") {
+                pdNonPregnantCount.push(details[i])
+            }
+        }
 
         success = true;
-        return res.send(JSON.stringify({ pregnantCounts: pdPregnantCount, nonPregnantCounts: pdNonPregnantCount, success }))
+        return res.send(JSON.stringify({ pregnantCounts: pdPregnantCount.length, nonPregnantCounts: pdNonPregnantCount.length, success }))
 
     } catch (error) {
         console.error(error.message);
@@ -58,11 +105,32 @@ router.get('/calf-born', fetchUser, async (req, res) => {
     let periodFrom = req.query.periodfrom;
     let periodTo = req.query.periodto;
     try {
-        let calfBornMaleCount = await calfBornDetail.find({ technicianId: technicianId, pdResult: 'male', village }).count();
-        let calfBornFeMaleCount = await calfBornDetail.find({ technicianId: technicianId, pdResult: 'female', village }).count();
+        let calfBornMaleCount = [], calfBornFeMaleCount = [];
+        let details;
+        if (village)
+            details = await calfBornDetail.find({ technicianId: technicianId, village: village })
+        else
+            details = await calfBornDetail.find({ technicianId: technicianId })
+
+        for (let i = 0; i < details.length; i++) {
+
+            if (periodFrom && periodTo) {
+                periodFrom = new Date(req.query.periodfrom);
+                periodTo = new Date(req.query.periodto);
+                if (!((periodFrom.getTime() < details[i].date.getTime()) && (details[i].date.getTime() < periodTo.getTime())))
+                    continue
+            }
+
+            if (details[i].sex === "male") {
+                calfBornMaleCount.push(details[i]);
+            }
+            else if (details[i].sex === "female") {
+                calfBornFeMaleCount.push(details[i])
+            }
+        }
 
         success = true;
-        return res.send(JSON.stringify({ maleCounts: calfBornMaleCount, femaleCounts: calfBornFeMaleCount, success }))
+        return res.send(JSON.stringify({ maleCounts: calfBornMaleCount.length, femaleCounts: calfBornFeMaleCount.length, success }))
 
     } catch (error) {
         console.error(error.message);
